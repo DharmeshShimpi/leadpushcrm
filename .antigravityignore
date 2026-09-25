@@ -1,0 +1,8 @@
+node_modules/
+.next
+dust/
+build/
+coverage/
+.git/
+*.log
+tests/

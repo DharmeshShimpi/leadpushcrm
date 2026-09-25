@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= appTitle %> - Dashboard</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Fixed Toast Container (Bottom-Right) -->
+    <div id="toast-container" style="position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 9999; display: flex; flex-direction: column; gap: 0.75rem; max-width: 400px; width: calc(100vw - 3rem); pointer-events: none;">
+      <!-- Toast: WhatsApp logged out or needs QR scan -->
+      <% if (waStatus && (waStatus.state === 'logged_out' || waStatus.state === 'waiting_for_qr')) { %>
+        <div class="toast-item" style="pointer-events: auto; background: #ffffff; border: 1px solid #fca5a5; border-left: 4px solid #dc2626; color: #09090b; padding: 0.85rem 1rem; border-radius: 8px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; position: relative;">
+          <div style="display: flex; align-items: center; gap: 0.6rem;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+            <div style="font-size: 0.8125rem;">
+              <div style="font-weight: 600; color: #991b1b;">WhatsApp Needs Reconnect</div>
+              <div style="color: #71717a; font-size: 0.75rem;"><%= waStatus.state === 'waiting_for_qr' ? 'QR scan waiting in Onboarding' : 'Session expired' %></div>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <a href="/app/<%= appSecret %>/onboarding?step=1" style="background: #dc2626; color: #ffffff; text-decoration: none; padding: 0.35rem 0.65rem; border-radius: 6px; font-weight: 600; font-size: 0.75rem; white-space: nowrap;">Reconnect</a>
+            <button onclick="this.closest('.toast-item').remove()" aria-label="Close" style="background: none; border: none; cursor: pointer; color: #71717a; padding: 0.2rem; display: flex; align-items: center; justify-content: center; border-radius: 4px; transition: color 0.15s ease;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+          </div>
+        </div>
+      <% } %>
+
+      <!-- Toast: WhatsApp reconnecting automatically -->
+      <% if (waStatus && (waStatus.state === 'connecting' || waStatus.state === 'disconnected')) { %>
+        <div class="toast-item" style="pointer-events: auto; background: #ffffff; border: 1px solid #fde68a; border-left: 4px solid #d97706; color: #09090b; padding: 0.85rem 1rem; border-radius: 8px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); display: flex; align-items: center; justify-content: space-between; gap: 0.6rem;">
+          <div style="display: flex; align-items: center; gap: 0.6rem;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            <div style="font-size: 0.8125rem;">
+              <div style="font-weight: 600; color: #92400e;">WhatsApp Reconnecting</div>
+              <div style="color: #71717a; font-size: 0.75rem;">Resuming inbound messages...</div>
+            </div>
+          </div>
+          <button onclick="this.closest('.toast-item').remove()" aria-label="Close" style="background: none; border: none; cursor: pointer; color: #71717a; padding: 0.2rem; display: flex; align-items: center; justify-content: center; border-radius: 4px; transition: color 0.15s ease;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+      <% } %>
+
+      <!-- Toast: Google Sheets sync delayed -->
+      <% if (typeof pendingSheetCount !== 'undefined' && pendingSheetCount > 0) { %>
+        <div class="toast-item" style="pointer-events: auto; background: #ffffff; border: 1px solid #fde68a; border-left: 4px solid #d97706; color: #09090b; padding: 0.85rem 1rem; border-radius: 8px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); display: flex; align-items: center; justify-content: space-between; gap: 0.6rem;">
+          <div style="display: flex; align-items: center; gap: 0.6rem;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+            <div style="font-size: 0.8125rem;">
+              <div style="font-weight: 600; color: #92400e;">Google Sheets Sync Delayed</div>
+              <div style="color: #71717a; font-size: 0.75rem;"><%= pendingSheetCount %> lead update(s) in retry queue</div>
+            </div>
+          </div>
+          <button onclick="this.closest('.toast-item').remove()" aria-label="Close" style="background: none; border: none; cursor: pointer; color: #71717a; padding: 0.2rem; display: flex; align-items: center; justify-content: center; border-radius: 4px; transition: color 0.15s ease;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+      <% } %>
+
+      <!-- Toast: Supabase backup delayed -->
+      <% if (typeof pendingSupabaseCount !== 'undefined' && pendingSupabaseCount > 0) { %>
+        <div class="toast-item" style="pointer-events: auto; background: #ffffff; border: 1px solid #fde68a; border-left: 4px solid #d97706; color: #09090b; padding: 0.85rem 1rem; border-radius: 8px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); display: flex; align-items: center; justify-content: space-between; gap: 0.6rem;">
+          <div style="display: flex; align-items: center; gap: 0.6rem;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+            <div style="font-size: 0.8125rem;">
+              <div style="font-weight: 600; color: #92400e;">Supabase Backup Delayed</div>
+              <div style="color: #71717a; font-size: 0.75rem;"><%= pendingSupabaseCount %> lead backup(s) in retry queue</div>
+            </div>
+          </div>
+          <button onclick="this.closest('.toast-item').remove()" aria-label="Close" style="background: none; border: none; cursor: pointer; color: #71717a; padding: 0.2rem; display: flex; align-items: center; justify-content: center; border-radius: 4px; transition: color 0.15s ease;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+      <% } %>
+    </div>
+
+    <main class="main-content">
+      <!-- Top Header Toolbar -->
+      <div class="dashboard-top-bar" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 0.75rem;">
+        <div>
+          <h1 style="font-size: 1.75rem; font-weight: 700; color: #09090b; letter-spacing: -0.025em; margin: 0; display: flex; align-items: baseline; gap: 0.35rem;">
+            LeadPush <span style="font-size: 0.875rem; font-weight: 500; color: #71717a;"><%= typeof channelInfo !== 'undefined' && channelInfo ? '• ' + channelInfo.name : 'v1' %></span>
+          </h1>
+          <% if (typeof user !== 'undefined' && user) { %>
+            <div style="font-size: 0.75rem; color: #71717a; margin-top: 0.15rem;">
+              Logged in as <strong><%= user.name %></strong> (<%= user.role %>)
+            </div>
+          <% } %>
+        </div>
+        <div class="dashboard-top-actions" style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+          <% if (typeof user !== 'undefined' && user && user.role === 'admin') { %>
+            <a href="/admin/dashboard" class="btn" style="background: #ffffff; color: #09090b; border: 1px solid #e4e4e7; padding: 0.45rem 0.9rem; font-size: 0.8125rem; font-weight: 500; text-decoration: none; border-radius: 8px; display: inline-flex; align-items: center; gap: 0.4rem; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);">
+              Admin Panel
+            </a>
+            <a href="/app/<%= appSecret %>/channels" class="btn" style="background: #ffffff; color: #09090b; border: 1px solid #e4e4e7; padding: 0.45rem 0.9rem; font-size: 0.8125rem; font-weight: 500; text-decoration: none; border-radius: 8px; display: inline-flex; align-items: center; gap: 0.4rem; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+              Channels
+            </a>
+          <% } %>
+
+          <% const leadsUrl = typeof channelInfo !== 'undefined' && channelInfo ? ('/app/' + appSecret + '/leads?channelId=' + channelInfo.id) : ('/app/' + appSecret + '/leads'); %>
+          <a href="<%= leadsUrl %>" class="btn" style="background: #09090b; color: #ffffff; padding: 0.45rem 0.9rem; font-size: 0.8125rem; font-weight: 500; text-decoration: none; border-radius: 8px; display: inline-flex; align-items: center; gap: 0.4rem;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect><path d="M9 12h6"></path><path d="M9 16h6"></path></svg>
+            View Leads
+          </a>
+
+          <% if (typeof user !== 'undefined' && user && user.role !== 'admin' && googleSheetsConnected && typeof googleConn !== 'undefined' && googleConn && googleConn.spreadsheet_id) { %>
+            <a href="https://docs.google.com/spreadsheets/d/<%= googleConn.spreadsheet_id %>" target="_blank" rel="noopener" class="btn" style="background: #ffffff; color: #09090b; border: 1px solid #e4e4e7; padding: 0.45rem 0.9rem; font-size: 0.8125rem; font-weight: 500; text-decoration: none; border-radius: 8px; display: inline-flex; align-items: center; gap: 0.4rem; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="3" y1="15" x2="21" y2="15"></line><line x1="9" y1="3" x2="9" y2="21"></line><line x1="15" y1="3" x2="15" y2="21"></line></svg>
+              Open Google Sheet
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+            </a>
+          <% } %>
+
+          <form action="/logout" method="POST" style="margin: 0;">
+            <button type="submit" class="btn" style="background: #ffffff; color: #71717a; border: 1px solid #e4e4e7; padding: 0.45rem 0.75rem; font-size: 0.8125rem; font-weight: 500; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 0.35rem; font-family: inherit;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+              Logout
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <% if (typeof user !== 'undefined' && user && user.role === 'admin' && typeof channelInfo !== 'undefined' && channelInfo) { %>
+        <div style="background: #f4f4f5; border: 1px solid #e4e4e7; border-radius: 8px; padding: 0.65rem 1rem; margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; flex-wrap: wrap;">
+          <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.8125rem; color: #18181b;">
+            <span style="font-weight: 600;">Viewing Channel:</span>
+            <span><%= channelInfo.name %> (<code style="background: #e4e4e7; padding: 0.1rem 0.3rem; border-radius: 3px; font-family: monospace; font-size: 0.75rem;"><%= channelInfo.id %></code>)</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <a href="/app/<%= appSecret %>/channels" style="font-size: 0.75rem; color: #52525b; text-decoration: none; font-weight: 500; background: #ffffff; border: 1px solid #d4d4d8; padding: 0.25rem 0.6rem; border-radius: 6px;">← Back to Channels</a>
+            <a href="/admin/dashboard" style="font-size: 0.75rem; color: #52525b; text-decoration: none; font-weight: 500; background: #ffffff; border: 1px solid #d4d4d8; padding: 0.25rem 0.6rem; border-radius: 6px;">Admin Dashboard</a>
+          </div>
+        </div>
+      <% } %>
+      <!-- Metric Cards with Horizontal Scroll -->
+      <div class="dashboard-grid-5" id="stats-cards-carousel">
+        <div class="card">
+          <div class="card-title">Total Leads</div>
+          <div class="card-value" id="stat-total"><%= stats ? stats.total : 0 %></div>
+          <div class="card-subtext">All captured contacts</div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Analyzing</div>
+          <div class="card-value" id="stat-analyzing" style="color: #2563eb;"><%= stats ? stats.analyzing : 0 %></div>
+          <div class="card-subtext">Conversations in analysis</div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Interested</div>
+          <div class="card-value" id="stat-interested" style="color: #16a34a;"><%= stats ? stats.interested : 0 %></div>
+          <div class="card-subtext">High purchase intent</div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Not Interested</div>
+          <div class="card-value" id="stat-not-interested" style="color: #dc2626;"><%= stats ? stats.not_interested : 0 %></div>
+          <div class="card-subtext">Low or no purchase intent</div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Undecided</div>
+          <div class="card-value" id="stat-undecided" style="color: #d97706;"><%= stats ? stats.undecided : 0 %></div>
+          <div class="card-subtext">Requires follow-up</div>
+        </div>
+      </div>
+
+      <div class="section-header">
+        <h2 class="section-title">Recent Leads</h2>
+      </div>
+
+      <div class="table-card" style="margin-bottom: 2.5rem;">
+        <div id="recent-leads-container" style="position: relative;">
+          <% if (leads && leads.length > 0) { 
+               const displayLeads = leads.slice(0, 5);
+               const hasMore = leads.length >= 5;
+          %>
+            <!-- Desktop / Tablet Table View -->
+            <div class="table-responsive">
+              <table style="width: 100%; border-collapse: collapse; text-align: left; min-width: 650px;">
+                <thead>
+                  <tr style="border-bottom: 1px solid var(--border-color); background-color: var(--bg-main);">
+                    <th style="padding: 0.75rem 1rem;">Customer Name</th>
+                    <th style="padding: 0.75rem 1rem;">WhatsApp Number</th>
+                    <th style="padding: 0.75rem 1rem;">Status</th>
+                    <th style="padding: 0.75rem 1rem;">Latest Message</th>
+                    <th style="padding: 0.75rem 1rem;">Conversion Score</th>
+                    <th style="padding: 0.75rem 1rem; text-align: right;">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="recent-leads-body">
+                  <% displayLeads.forEach(function(lead, idx) { 
+                       const isFifth = idx === 4 && hasMore;
+                  %>
+                    <tr class="<%= isFifth ? 'row-fifth-blur' : '' %>" style="border-bottom: 1px solid var(--border-color);">
+                      <td style="padding: 0.75rem 1rem; font-weight: 600;"><%= lead.customer_name %></td>
+                      <td style="padding: 0.75rem 1rem; color: var(--text-muted);">
+                        <% if (lead.display_phone && !lead.display_phone.includes('unavailable')) { 
+                             const dialNum = lead.display_phone.replace(/[^\d+]/g, '');
+                        %>
+                          <a href="tel:<%= dialNum %>" class="phone-link" title="Click to call <%= lead.display_phone %>">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.6;"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                            <span><%= lead.display_phone %></span>
+                          </a>
+                        <% } else { %>
+                          <%= lead.display_phone || 'WhatsApp ID unavailable' %>
+                        <% } %>
+                      </td>
+                      <td style="padding: 0.75rem 1rem;">
+                        <span class="status-pill status-<%= lead.status %>">
+                          <span class="status-dot"></span>
+                          <%= lead.status.replace('_', ' ') %>
+                        </span>
+                      </td>
+                      <td style="padding: 0.75rem 1rem; max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><%= lead.latest_message || '' %></td>
+                      <td style="padding: 0.75rem 1rem;">
+                        <span class="score-pill score-<%= (lead.conversion_score || 'Warm').toLowerCase() %>">
+                          <% if (lead.conversion_score === 'Hot') { %>
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 3.5z"></path></svg> Hot
+                          <% } else if (lead.conversion_score === 'Cold') { %>
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="2" x2="12" y2="22"></line><line x1="20" y1="17" x2="4" y2="7"></line><line x1="20" y1="7" x2="4" y2="7"></line></svg> Cold
+                          <% } else { %>
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg> Warm
+                          <% } %>
+                        </span>
+                      </td>
+                      <td style="padding: 0.75rem 1rem; text-align: right;">
+                        <a href="/app/<%= appSecret %>/leads/<%= lead.id %>" class="btn" style="padding: 0.35rem 0.75rem; font-size: 0.8125rem; background-color: var(--accent-blue-light); color: var(--accent-blue);">
+                          View Details
+                        </a>
+                      </td>
+                    </tr>
+                  <% }); %>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Mobile Seamless Card List (No sideways scrolling, clean dividers) -->
+            <div class="leads-mobile-list">
+              <% displayLeads.forEach(function(lead) { 
+                   const rawPhone = lead.display_phone || (lead.whatsapp_phone ? lead.whatsapp_phone : '');
+                   const dialNum = (rawPhone && !rawPhone.includes('unavailable')) ? rawPhone.replace(/[^\d+]/g, '') : null;
+              %>
+                <div class="lead-mobile-item" onclick="window.location.href='/app/<%= appSecret %>/leads/<%= lead.id %>'" style="cursor: pointer;">
+                  <div class="lead-mobile-info">
+                    <div class="lead-card-name"><%= lead.customer_name || 'Anonymous Contact' %></div>
+                    <div class="lead-card-phone">
+                      <% if (dialNum) { %>
+                        <a href="tel:<%= dialNum %>" class="phone-link" onclick="event.stopPropagation();">
+                          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                          <span><%= rawPhone %></span>
+                        </a>
+                      <% } else { %>
+                        <span style="color: var(--text-muted); display: inline-flex; align-items: center; gap: 0.3rem;">
+                          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.6;"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                          <span><%= rawPhone || 'WhatsApp ID unavailable' %></span>
+                        </span>
+                      <% } %>
+                    </div>
+                  </div>
+                  <div class="lead-mobile-right">
+                    <div class="lead-card-badges">
+                      <span class="status-pill status-<%= lead.status %>">
+                        <span class="status-dot"></span>
+                        <%= lead.status.replace('_', ' ') %>
+                      </span>
+                      <span class="score-pill score-<%= (lead.conversion_score || 'Warm').toLowerCase() %>">
+                        <%= lead.conversion_score || 'Warm' %>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              <% }); %>
+            </div>
+
+            <% if (hasMore) { %>
+              <div id="table-blur-overlay" style="margin-top: 1rem; text-align: center;">
+                <a href="/app/<%= appSecret %>/leads" class="btn" style="background: #09090b; color: #ffffff; padding: 0.55rem 1.35rem; font-size: 0.8125rem; font-weight: 600; text-decoration: none; border-radius: 9999px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); display: inline-flex; align-items: center; gap: 0.5rem;">
+                  <span>View All Leads</span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                </a>
+              </div>
+            <% } %>
+          <% } else { %>
+            <div class="empty-state">
+              <div class="empty-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+              </div>
+              <h3 class="empty-title">No leads captured yet</h3>
+              <p class="empty-desc">When inbound messages arrive via WhatsApp, customer leads will automatically appear here.</p>
+            </div>
+          <% } %>
+        </div>
+      </div>
+    </main>
+
+    <!-- Mobile Bottom Navigation Bar -->
+    <nav class="bottom-nav">
+      <a href="/app/<%= appSecret %>" class="bottom-nav-item active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+        <span>Overview</span>
+      </a>
+      <a href="/app/<%= appSecret %>/leads" class="bottom-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+        <span>Leads</span>
+      </a>
+      <% if (googleSheetsConnected && typeof googleConn !== 'undefined' && googleConn && googleConn.spreadsheet_id) { %>
+        <a href="https://docs.google.com/spreadsheets/d/<%= googleConn.spreadsheet_id %>" target="_blank" rel="noopener" class="bottom-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="3" y1="15" x2="21" y2="15"></line><line x1="9" y1="3" x2="9" y2="21"></line><line x1="15" y1="3" x2="15" y2="21"></line></svg>
+          <span>Sheets</span>
+        </a>
+      <% } %>
+    </nav>
+
+
+    </main>
+
+  </div>
+
+  <script>
+    const secret = "<%= appSecret %>";
+    const currentChannelId = "<%= (channelInfo && channelInfo.id) ? channelInfo.id : (user && user.channel_id ? user.channel_id : '') %>";
+
+    async function refreshDashboardData() {
+      try {
+        const channelQuery = currentChannelId ? '?channelId=' + encodeURIComponent(currentChannelId) : '';
+        const res = await fetch(`/app/${secret}/api/dashboard${channelQuery}`);
+        const data = await res.json();
+        if (!data.ok) return;
+
+        // Update statistic cards
+        if (data.stats) {
+          document.getElementById('stat-total').textContent = data.stats.total || 0;
+          document.getElementById('stat-analyzing').textContent = data.stats.analyzing || 0;
+          document.getElementById('stat-interested').textContent = data.stats.interested || 0;
+          document.getElementById('stat-not-interested').textContent = data.stats.not_interested || 0;
+          document.getElementById('stat-undecided').textContent = data.stats.undecided || 0;
+        }
+
+        // Update WhatsApp status
+        if (data.whatsAppStatus) {
+          const subtext = document.getElementById('wa-card-subtext');
+          const badge = document.getElementById('wa-card-badge');
+          const badgeText = document.getElementById('wa-card-badge-text');
+          const st = data.whatsAppStatus.state;
+
+          if (st === 'connected') {
+            if (subtext) subtext.textContent = 'Connected: ' + (data.whatsAppStatus.connectedNumber || 'Active');
+            if (badge) badge.className = 'status-pill connected';
+            if (badgeText) badgeText.textContent = 'Connected';
+          } else if (st === 'disconnected') {
+            if (subtext) subtext.textContent = 'Reconnecting automatically...';
+            if (badge) badge.className = 'status-pill disconnected';
+            if (badgeText) badgeText.textContent = 'Reconnecting';
+          } else if (st === 'logged_out') {
+            if (subtext) subtext.textContent = 'Logged out - reconnect required';
+            if (badge) badge.className = 'status-pill disconnected';
+            if (badgeText) badgeText.textContent = 'Logged Out';
+          }
+        }
+
+        // Update recent leads table and mobile cards dynamically
+        const leadsContainer = document.getElementById('recent-leads-container');
+        if (leadsContainer) {
+          if (data.recentLeads && data.recentLeads.length > 0) {
+            const displayLeads = data.recentLeads.slice(0, 5);
+            const hasMore = data.recentLeads.length >= 5;
+
+            // Desktop Table Rows
+            const rowsHtml = displayLeads.map((lead, idx) => {
+              const score = lead.conversion_score || 'Warm';
+              const isFifth = idx === 4 && hasMore;
+              let scoreSvg = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg> Warm';
+              if (score === 'Hot') {
+                scoreSvg = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 3.5z"></path></svg> Hot';
+              } else if (score === 'Cold') {
+                scoreSvg = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="2" x2="12" y2="22"></line><line x1="20" y1="17" x2="4" y2="7"></line></svg> Cold';
+              }
+
+              let phoneHtml = escapeHtml(lead.display_phone || 'WhatsApp ID unavailable');
+              if (lead.display_phone && !lead.display_phone.includes('unavailable')) {
+                const dialNum = lead.display_phone.replace(/[^\d+]/g, '');
+                phoneHtml = `<a href="tel:${dialNum}" class="phone-link" title="Click to call ${escapeHtml(lead.display_phone)}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.6;"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg><span>${escapeHtml(lead.display_phone)}</span></a>`;
+              }
+
+              return `
+              <tr style="border-bottom: 1px solid var(--border-color); ${isFifth ? 'filter: blur(1.5px); opacity: 0.4;' : ''}">
+                <td style="padding: 0.75rem 1rem; font-weight: 600;">${escapeHtml(lead.customer_name)}</td>
+                <td style="padding: 0.75rem 1rem; color: var(--text-muted);">${phoneHtml}</td>
+                <td style="padding: 0.75rem 1rem;">
+                  <span class="status-pill status-${lead.status}">
+                    <span class="status-dot"></span>
+                    ${escapeHtml(lead.status.replace('_', ' '))}
+                  </span>
+                </td>
+                <td style="padding: 0.75rem 1rem; max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHtml(lead.latest_message || '')}</td>
+                <td style="padding: 0.75rem 1rem;">
+                  <span class="score-pill score-${score.toLowerCase()}">${scoreSvg}</span>
+                </td>
+                <td style="padding: 0.75rem 1rem; text-align: right;">
+                  <a href="/app/${secret}/leads/${lead.id}" class="btn" style="padding: 0.35rem 0.75rem; font-size: 0.8125rem; background-color: var(--accent-blue-light); color: var(--accent-blue);">
+                    View Details
+                  </a>
+                </td>
+              </tr>
+            `}).join('');
+
+            // Mobile Cards HTML (Unified card list with seamless rows)
+            const mobileCardsHtml = displayLeads.map((lead) => {
+              const rawPhone = lead.display_phone || (lead.whatsapp_phone ? lead.whatsapp_phone : '');
+              const dialNum = (rawPhone && !rawPhone.includes('unavailable')) ? rawPhone.replace(/[^\d+]/g, '') : null;
+              
+              const phoneHtml = dialNum ? `
+                <a href="tel:${dialNum}" class="phone-link" onclick="event.stopPropagation();">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                  <span>${escapeHtml(rawPhone)}</span>
+                </a>
+              ` : `
+                <span style="color: var(--text-muted); display: inline-flex; align-items: center; gap: 0.3rem;">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.6;"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                  <span>${escapeHtml(rawPhone || 'WhatsApp ID unavailable')}</span>
+                </span>
+              `;
+
+              return `
+                <div class="lead-mobile-item" onclick="window.location.href='/app/${secret}/leads/${lead.id}'" style="cursor: pointer;">
+                  <div class="lead-mobile-info">
+                    <div class="lead-card-name">${escapeHtml(lead.customer_name || 'Anonymous Contact')}</div>
+                    <div class="lead-card-phone">${phoneHtml}</div>
+                  </div>
+                  <div class="lead-mobile-right">
+                    <div class="lead-card-badges">
+                      <span class="status-pill status-${lead.status}">
+                        <span class="status-dot"></span>
+                        ${escapeHtml(lead.status.replace('_', ' '))}
+                      </span>
+                      <span class="score-pill score-${(lead.conversion_score || 'Warm').toLowerCase()}">
+                        ${escapeHtml(lead.conversion_score || 'Warm')}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              `;
+            }).join('');
+
+            const overlayHtml = hasMore ? `
+              <div id="table-blur-overlay" style="margin-top: 1rem; text-align: center;">
+                <a href="/app/${secret}/leads" class="btn" style="background: #09090b; color: #ffffff; padding: 0.55rem 1.35rem; font-size: 0.8125rem; font-weight: 600; text-decoration: none; border-radius: 9999px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); display: inline-flex; align-items: center; gap: 0.5rem;">
+                  <span>View All Leads</span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                </a>
+              </div>
+            ` : '';
+
+            leadsContainer.innerHTML = `
+              <div class="table-responsive">
+                <table style="width: 100%; border-collapse: collapse; text-align: left; min-width: 650px;">
+                  <thead>
+                    <tr style="border-bottom: 1px solid var(--border-color); background-color: var(--bg-main);">
+                      <th style="padding: 0.75rem 1rem;">Customer Name</th>
+                      <th style="padding: 0.75rem 1rem;">WhatsApp Number</th>
+                      <th style="padding: 0.75rem 1rem;">Status</th>
+                      <th style="padding: 0.75rem 1rem;">Latest Message</th>
+                      <th style="padding: 0.75rem 1rem;">Conversion Score</th>
+                      <th style="padding: 0.75rem 1rem; text-align: right;">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="recent-leads-body">
+                    ${rowsHtml}
+                  </tbody>
+                </table>
+              </div>
+              <div class="leads-mobile-list">
+                ${mobileCardsHtml}
+              </div>
+              ${overlayHtml}
+            `;
+          } else {
+            leadsContainer.innerHTML = `
+              <div class="empty-state">
+                <div class="empty-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
+                </div>
+                <h3 class="empty-title">No leads captured yet</h3>
+                <p class="empty-desc">When inbound messages arrive via WhatsApp, customer leads will automatically appear here.</p>
+              </div>
+            `;
+          }
+        }
+      } catch (e) {
+        console.error('Error refreshing dashboard data:', e);
+      }
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    async function confirmGoogleDisconnect() {
+      if (!confirm('Are you sure you want to disconnect Google Sheets? Existing lead backups and Google Sheet rows will NOT be deleted.')) {
+        return;
+      }
+      try {
+        const res = await fetch(`/app/${secret}/google/disconnect`, { method: 'POST' });
+        const data = await res.json();
+        if (data.ok) {
+          window.location.reload();
+        }
+      } catch (err) {
+        alert('Failed to disconnect Google account.');
+      }
+    }
+
+    function scrollStatsCards(offset) {
+      const el = document.getElementById('stats-cards-carousel');
+      if (el) {
+        el.scrollBy({ left: offset, behavior: 'smooth' });
+      }
+    }
+
+    // Connect to SSE live stream for real-time updates
+    try {
+      const evtSource = new EventSource(`/app/${secret}/events`);
+      evtSource.addEventListener('dashboard_update', (e) => {
+        try {
+          if (e && e.data) {
+            const d = JSON.parse(e.data);
+            if (d.channelId && currentChannelId && d.channelId !== currentChannelId) {
+              return;
+            }
+          }
+        } catch {}
+        refreshDashboardData();
+      });
+    } catch (err) {
+      console.warn('SSE not supported or connection error, falling back to 30s polling.');
+    }
+
+    // 30s polling fallback
+    setInterval(refreshDashboardData, 30000);
+  </script>
+</body>
+</html>

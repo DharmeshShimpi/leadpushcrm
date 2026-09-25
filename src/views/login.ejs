@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= appTitle %> - Login</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .login-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 1.5rem;
+      background: var(--bg-main);
+    }
+    .login-card {
+      width: 100%;
+      max-width: 400px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 2.5rem 2rem;
+      box-shadow: var(--shadow-md);
+    }
+    .login-brand {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .login-brand h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: #09090b;
+      letter-spacing: -0.025em;
+      margin: 0;
+    }
+    .login-brand p {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-top: 0.35rem;
+    }
+    .login-field {
+      margin-bottom: 1.25rem;
+    }
+    .login-field label {
+      display: block;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: #09090b;
+      margin-bottom: 0.4rem;
+    }
+    .login-field input {
+      width: 100%;
+      padding: 0.65rem 0.85rem;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      font-size: 0.875rem;
+      font-family: inherit;
+      color: var(--text-main);
+      outline: none;
+      transition: border-color 0.15s ease;
+      box-sizing: border-box;
+    }
+    .login-field input:focus {
+      border-color: #09090b;
+    }
+    .password-input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .password-input-wrapper input {
+      padding-right: 2.5rem;
+    }
+    .toggle-password-btn {
+      position: absolute;
+      right: 0.5rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      padding: 0.35rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #71717a;
+      border-radius: 4px;
+      transition: color 0.15s ease;
+    }
+    .toggle-password-btn:hover {
+      color: #09090b;
+    }
+    .toggle-password-btn svg {
+      width: 16px;
+      height: 16px;
+      display: block;
+    }
+    .login-btn {
+      width: 100%;
+      padding: 0.7rem;
+      background: #09090b;
+      color: #ffffff;
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: 0.875rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.15s ease;
+      margin-top: 0.5rem;
+    }
+    .login-btn:hover {
+      background: #27272a;
+    }
+    .login-error {
+      background: var(--badge-danger-bg);
+      color: var(--badge-danger-text);
+      padding: 0.65rem 0.85rem;
+      border-radius: var(--radius-md);
+      font-size: 0.8125rem;
+      font-weight: 500;
+      margin-bottom: 1.25rem;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-card">
+      <div class="login-brand">
+        <h1>LeadPush</h1>
+        <p>Sign in to your account</p>
+      </div>
+
+      <% if (error === 'invalid_credentials') { %>
+        <div class="login-error">Invalid username or password.</div>
+      <% } else if (error === 'missing_fields') { %>
+        <div class="login-error">Please enter your username and password.</div>
+      <% } else if (error === 'no_channel') { %>
+        <div class="login-error">No channel assigned to this account. Contact admin.</div>
+      <% } else if (error === 'server_error') { %>
+        <div class="login-error">An error occurred. Please try again.</div>
+      <% } %>
+
+      <form action="/login" method="POST">
+        <div class="login-field">
+          <label for="identifier">Username</label>
+          <input type="text" id="identifier" name="identifier" placeholder="Enter your username" required autofocus>
+        </div>
+
+        <div class="login-field">
+          <label for="password">Password</label>
+          <div class="password-input-wrapper">
+            <input type="password" id="password" name="password" placeholder="Enter your password" required>
+            <button type="button" class="toggle-password-btn" id="togglePassword" aria-label="Toggle password visibility" title="Toggle password visibility">
+              <!-- Eye Icon (Visible when password is hidden) -->
+              <svg id="eyeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+              <!-- Eye Off Icon (Visible when password is shown) -->
+              <svg id="eyeOffIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
+                <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/>
+                <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/>
+                <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/>
+                <line x1="2" y1="2" x2="22" y2="22"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" class="login-btn">Login</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      const toggleBtn = document.getElementById('togglePassword');
+      const passwordInput = document.getElementById('password');
+      const eyeIcon = document.getElementById('eyeIcon');
+      const eyeOffIcon = document.getElementById('eyeOffIcon');
+
+      if (toggleBtn && passwordInput && eyeIcon && eyeOffIcon) {
+        toggleBtn.addEventListener('click', function() {
+          const isPassword = passwordInput.type === 'password';
+          passwordInput.type = isPassword ? 'text' : 'password';
+          eyeIcon.style.display = isPassword ? 'none' : 'block';
+          eyeOffIcon.style.display = isPassword ? 'block' : 'none';
+        });
+      }
+    })();
+  </script>
+</body>
+</html>

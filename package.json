@@ -1,0 +1,45 @@
+{
+  "name": "leadpush",
+  "version": "1.0.0",
+  "description": "WhatsApp lead generation & management dashboard",
+  "main": "dist/server.js",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "rimraf dist && tsc && node scripts/copyAssets.js",
+    "reset-db": "node scripts/fastWipeSqlite.cjs",
+    "clear-db": "node scripts/fastWipeSqlite.cjs",
+    "postinstall": "npm run build",
+    "start": "node dist/server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.112.3",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/better-sqlite3": "^7.6.12",
+    "@types/cookie-parser": "^1.4.10",
+    "@types/ejs": "^3.1.5",
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.13.4",
+    "@types/qrcode": "^1.5.5",
+    "@whiskeysockets/baileys": "^7.0.0-rc14",
+    "bcryptjs": "^3.0.3",
+    "better-sqlite3": "^11.8.1",
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^16.4.7",
+    "ejs": "^3.1.10",
+    "express": "^4.21.2",
+    "googleapis": "^174.0.1",
+    "groq-sdk": "^1.5.0",
+    "qrcode": "^1.5.4",
+    "rimraf": "^6.0.1",
+    "tsx": "^4.23.12",
+    "typescript": "^5.7.3"
+  },
+  "devDependencies": {
+    "cpy-cli": "^5.0.0",
+    "ts-node-dev": "^2.0.0"
+  }
+}

@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= appTitle %> - WhatsApp Conversation</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    html, body {
+      height: 100vh;
+      overflow: hidden;
+      margin: 0;
+      padding: 0;
+      background: var(--bg-main, #fafafa);
+    }
+    .conversation-page {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      max-width: 860px;
+      margin: 0 auto;
+      background: #ffffff;
+      box-shadow: 0 0 24px rgba(0,0,0,0.06);
+    }
+    .conversation-header {
+      padding: 0.85rem 1rem;
+      background: #ffffff;
+      border-bottom: 1px solid var(--border-color, #e4e4e7);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      z-index: 10;
+    }
+    .conversation-header-left {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      min-width: 0;
+    }
+    .conversation-back-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: 1px solid var(--border-color, #e4e4e7);
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-main, #09090b);
+      text-decoration: none;
+      flex-shrink: 0;
+      transition: background 0.15s ease;
+    }
+    .conversation-back-btn:active {
+      background: var(--subtle-bg, #f4f4f5);
+    }
+    .conversation-avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: #f4f4f5;
+      border: 1px solid var(--border-color, #e4e4e7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 1rem;
+      color: #09090b;
+      flex-shrink: 0;
+    }
+    .conversation-user-info {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    .conversation-user-name {
+      font-weight: 600;
+      font-size: 0.9375rem;
+      color: var(--text-main, #09090b);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.2;
+    }
+    .conversation-user-phone {
+      font-size: 0.78125rem;
+      color: var(--text-muted, #71717a);
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      margin-top: 0.15rem;
+    }
+    .conversation-chat-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem;
+      background-color: #f7f4ef;
+      background-image: linear-gradient(rgba(247, 244, 239, 0.65), rgba(247, 244, 239, 0.65)), url('/bg_clean.webp');
+      background-repeat: repeat;
+      background-size: auto, 260px auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    @media (max-width: 768px) {
+      .conversation-page {
+        height: 100vh;
+        box-shadow: none;
+      }
+      .conversation-chat-body {
+        padding: 0.85rem 0.75rem 5rem 0.75rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="conversation-page">
+    <!-- Clean Header -->
+    <header class="conversation-header">
+      <div class="conversation-header-left">
+        <a href="/app/<%= appSecret %>/leads/<%= lead.id %>" class="conversation-back-btn" aria-label="Back to Lead Details">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        </a>
+        <div class="conversation-avatar">
+          <%= (lead.customer_name && lead.customer_name !== 'N/A') ? lead.customer_name.charAt(0).toUpperCase() : 'C' %>
+        </div>
+        <div class="conversation-user-info">
+          <div class="conversation-user-name"><%= lead.customer_name || 'Anonymous Contact' %></div>
+          <div class="conversation-user-phone">
+            <% if (lead.display_phone && !lead.display_phone.includes('unavailable')) { 
+                 const dialNum = lead.display_phone.replace(/[^\d+]/g, '');
+            %>
+              <a href="tel:<%= dialNum %>" class="phone-link" onclick="event.stopPropagation();">
+                <span><%= lead.display_phone %></span>
+              </a>
+            <% } else { %>
+              <span><%= lead.display_phone || 'WhatsApp ID unavailable' %></span>
+            <% } %>
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <% if (lead.whatsapp_phone && !lead.whatsapp_phone.includes('unavailable')) { 
+             const cleanPhone = lead.whatsapp_phone.replace(/\D/g, '');
+        %>
+          <a href="https://wa.me/<%= cleanPhone %>" target="_blank" rel="noopener" class="btn" style="background: #16a34a; color: #ffffff; padding: 0.35rem 0.7rem; font-size: 0.75rem; font-weight: 600; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 0.35rem; box-shadow: 0 1px 2px rgba(0,0,0,0.06);">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            <span>WhatsApp</span>
+          </a>
+        <% } %>
+      </div>
+    </header>
+
+    <!-- Chat Messages Stream -->
+    <div class="conversation-chat-body" id="chat-messages-container">
+      <% if (messages && messages.length > 0) { %>
+        <% 
+          let lastDateStr = '';
+          messages.forEach(function(msg) { 
+            const d = new Date(msg.sent_at);
+            const dateStr = d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+            const timeStr = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        %>
+          <% if (dateStr !== lastDateStr) { %>
+            <div class="chat-date-separator">
+              <span><%= dateStr %></span>
+            </div>
+            <% lastDateStr = dateStr; %>
+          <% } %>
+
+          <div class="chat-bubble <%= msg.direction === 'outgoing' ? 'outgoing' : 'incoming' %>">
+            <div style="font-size: 0.725rem; font-weight: 600; margin-bottom: 0.2rem; opacity: 0.75;">
+              <%= msg.direction === 'outgoing' ? 'Business Account' : (msg.sender_name || 'Customer') %>
+            </div>
+            <div style="white-space: pre-wrap; word-break: break-word;"><%= msg.message_text %></div>
+            <div class="chat-meta">
+              <span><%= timeStr %></span>
+            </div>
+          </div>
+        <% }); %>
+      <% } else if (lead.latest_message && lead.latest_message.trim()) { 
+        const d = new Date(lead.last_activity_at || lead.created_at || Date.now());
+        const dateStr = isNaN(d.getTime()) ? 'Recent' : d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+        const timeStr = isNaN(d.getTime()) ? '' : d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      %>
+        <div class="chat-date-separator">
+          <span><%= dateStr %></span>
+        </div>
+
+        <% if (lead.conversation_summary) { %>
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 0.75rem 1rem; margin-bottom: 0.5rem; font-size: 0.8125rem; color: #475569;">
+            <div style="font-weight: 600; font-size: 0.75rem; color: #1e293b; margin-bottom: 0.25rem; text-transform: uppercase; letter-spacing: 0.04em;">Conversation Summary</div>
+            <%= lead.conversation_summary %>
+          </div>
+        <% } %>
+
+        <div class="chat-bubble incoming">
+          <div style="font-size: 0.725rem; font-weight: 600; margin-bottom: 0.2rem; opacity: 0.75;">
+            <%= (lead.customer_name && lead.customer_name !== 'N/A') ? lead.customer_name : 'Customer' %>
+          </div>
+          <div style="white-space: pre-wrap; word-break: break-word;"><%= lead.latest_message %></div>
+          <div class="chat-meta">
+            <span><%= timeStr %></span>
+          </div>
+        </div>
+      <% } else { %>
+        <% if (lead.conversation_summary) { %>
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 0.85rem 1rem; margin: 1rem 0; font-size: 0.8125rem; color: #475569;">
+            <div style="font-weight: 600; font-size: 0.75rem; color: #1e293b; margin-bottom: 0.25rem; text-transform: uppercase; letter-spacing: 0.04em;">Conversation Summary</div>
+            <%= lead.conversation_summary %>
+          </div>
+        <% } %>
+        <div id="no-messages-placeholder" style="text-align: center; padding: 3rem 1.5rem; color: #71717a; font-size: 0.875rem;">
+          <div style="margin-bottom: 0.5rem; color: #71717a;">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+          </div>
+          <div style="font-weight: 600; color: #09090b; margin-bottom: 0.25rem;">Waiting for new incoming messages</div>
+          <p style="margin: 0; font-size: 0.8125rem;">New messages from WhatsApp will automatically appear here in real time.</p>
+        </div>
+      <% } %>
+    </div>
+  </div>
+
+  <script>
+    const secret = "<%= appSecret %>";
+    const currentLeadId = Number("<%= lead.id %>");
+
+    function scrollToBottom() {
+      const container = document.getElementById('chat-messages-container');
+      if (container) {
+        container.scrollTop = container.scrollHeight;
+      }
+    }
+    scrollToBottom();
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    async function refreshChatMessages() {
+      try {
+        const res = await fetch(`/app/${secret}/api/leads/${currentLeadId}/messages`);
+        const data = await res.json();
+        if (!data.ok || !data.messages) return;
+
+        const container = document.getElementById('chat-messages-container');
+        if (!container) return;
+
+        if (data.messages.length > 0) {
+          let lastDate = '';
+          let html = '';
+          data.messages.forEach(msg => {
+            if (msg.sent_at_date && msg.sent_at_date !== lastDate) {
+              html += `<div class="chat-date-separator"><span>${escapeHtml(msg.sent_at_date)}</span></div>`;
+              lastDate = msg.sent_at_date;
+            }
+            html += `
+              <div class="chat-bubble ${msg.direction === 'outgoing' ? 'outgoing' : 'incoming'}">
+                <div style="font-size: 0.725rem; font-weight: 600; margin-bottom: 0.2rem; opacity: 0.75;">
+                  ${msg.direction === 'outgoing' ? 'Business Account' : escapeHtml(msg.sender_name)}
+                </div>
+                <div style="white-space: pre-wrap; word-break: break-word;">${escapeHtml(msg.message_text)}</div>
+                <div class="chat-meta">
+                  <span>${escapeHtml(msg.sent_at_time || '')}</span>
+                </div>
+              </div>
+            `;
+          });
+          container.innerHTML = html;
+          scrollToBottom();
+        }
+      } catch (e) {
+        console.error('Error refreshing chat messages:', e);
+      }
+    }
+
+    // Connect to SSE live stream for real-time chat updates
+    try {
+      const evtSource = new EventSource(`/app/${secret}/events`);
+      evtSource.addEventListener('chat_update', (e) => {
+        try {
+          const data = JSON.parse(e.data);
+          if (data && data.leadId === currentLeadId) {
+            refreshChatMessages();
+          }
+        } catch {
+          refreshChatMessages();
+        }
+      });
+      evtSource.addEventListener('dashboard_update', () => {
+        refreshChatMessages();
+      });
+    } catch (err) {
+      console.warn('SSE not supported, fallback active.');
+    }
+  </script>
+</body>
+</html>

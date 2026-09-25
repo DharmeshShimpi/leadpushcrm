@@ -1,0 +1,1519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= appTitle %> - Setup Onboarding</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    /* Shadcn UI Monochrome Onboarding Theme */
+    :root {
+      --ob-bg: #fafafa;
+      --ob-card: #ffffff;
+      --ob-border: #e4e4e7;
+      --ob-border-hover: #a1a1aa;
+      --ob-fg: #09090b;
+      --ob-muted-fg: #71717a;
+      --ob-subtle-bg: #f4f4f5;
+      --ob-radius: 14px;
+      --ob-radius-sm: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: var(--ob-bg);
+      color: var(--ob-fg);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+      -webkit-font-smoothing: antialiased;
+      margin: 0;
+      padding: 0;
+    }
+
+    .ob-wrapper {
+      width: 100%;
+      max-width: 520px;
+      margin: 2.5rem auto;
+      padding: 0 1.25rem;
+    }
+
+    .ob-header {
+      text-align: center;
+      margin-bottom: 1.75rem;
+    }
+
+    .ob-brand-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--ob-fg);
+      color: #ffffff;
+      padding: 0.35rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      margin-bottom: 0.85rem;
+    }
+
+    .ob-title {
+      font-size: 1.45rem;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      color: var(--ob-fg);
+      margin: 0 0 0.4rem 0;
+    }
+
+    .ob-subtitle {
+      font-size: 0.875rem;
+      color: var(--ob-muted-fg);
+      margin: 0;
+      line-height: 1.45;
+    }
+
+    /* Stepper Bar - Shadcn Segmented Control style */
+    .ob-stepper {
+      display: flex;
+      width: 100%;
+      background: var(--ob-subtle-bg);
+      border: 1px solid var(--ob-border);
+      border-radius: 10px;
+      padding: 4px;
+      gap: 4px;
+      margin-bottom: 1.5rem;
+    }
+
+    .ob-step-tab {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.45rem;
+      padding: 0.6rem 0.5rem;
+      border-radius: 7px;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: var(--ob-muted-fg);
+      text-decoration: none;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+    }
+
+    .ob-step-tab:hover {
+      color: var(--ob-fg);
+    }
+
+    .ob-step-tab.active {
+      background: #ffffff;
+      color: var(--ob-fg);
+      font-weight: 600;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    }
+
+    .ob-step-tab.completed {
+      color: var(--ob-fg);
+    }
+
+    .ob-step-icon {
+      width: 14px;
+      height: 14px;
+      flex-shrink: 0;
+    }
+
+    /* Card Layout */
+    .ob-card {
+      background: var(--ob-card);
+      border: 1px solid var(--ob-border);
+      border-radius: var(--ob-radius);
+      padding: 1.65rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .ob-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--ob-subtle-bg);
+    }
+
+    .ob-card-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--ob-fg);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 0;
+    }
+
+    /* Pill Badges */
+    .ob-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.3rem 0.75rem;
+      border-radius: 9999px;
+      border: 1px solid var(--ob-border);
+      background: var(--ob-subtle-bg);
+      color: var(--ob-muted-fg);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .ob-pill.connected {
+      background: #f0fdf4;
+      color: #166534;
+      border-color: #bbf7d0;
+    }
+
+    .ob-pill-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    /* QR Code Display Panel */
+    .ob-qr-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem 1rem;
+      background: #fafafa;
+      border: 1px dashed var(--ob-border);
+      border-radius: var(--ob-radius-sm);
+      margin-bottom: 1.25rem;
+      text-align: center;
+    }
+
+    .ob-qr-frame {
+      width: 180px;
+      height: 180px;
+      max-width: 100%;
+      background: #ffffff;
+      border: 1px solid var(--ob-border);
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 10px;
+      margin-bottom: 1rem;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+      position: relative;
+      box-sizing: border-box;
+    }
+
+    #live-qr-img {
+      width: 100%;
+      height: 100%;
+      max-width: 160px;
+      max-height: 160px;
+      object-fit: contain;
+      border-radius: 4px;
+    }
+
+    .ob-qr-instruction {
+      font-size: 0.8125rem;
+      color: var(--ob-muted-fg);
+      max-width: 360px;
+      line-height: 1.5;
+      margin: 0 auto;
+    }
+
+    /* Choice Cards (Step 2) */
+    .ob-choice-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .ob-choice-card {
+      border: 1px solid var(--ob-border);
+      border-radius: var(--ob-radius-sm);
+      padding: 1rem;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      background: #ffffff;
+    }
+
+    .ob-choice-card:hover {
+      border-color: var(--ob-border-hover);
+    }
+
+    .ob-choice-card.selected {
+      border-color: var(--ob-fg);
+      background: #fafafa;
+      box-shadow: 0 0 0 1px var(--ob-fg);
+    }
+
+    .ob-choice-radio {
+      margin-top: 0.15rem;
+      accent-color: var(--ob-fg);
+    }
+
+    .ob-choice-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--ob-fg);
+      margin-bottom: 0.15rem;
+    }
+
+    .ob-choice-desc {
+      font-size: 0.8125rem;
+      color: var(--ob-muted-fg);
+      line-height: 1.35;
+    }
+
+    /* Buttons */
+    .ob-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      min-height: 42px;
+      padding: 0.6rem 1.25rem;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.15s ease;
+      border: 1px solid transparent;
+      box-sizing: border-box;
+      white-space: nowrap;
+      text-align: center;
+    }
+
+    .ob-btn:active {
+      transform: scale(0.98);
+    }
+
+    .ob-btn-primary {
+      background: var(--ob-fg);
+      color: #ffffff;
+      border-color: var(--ob-fg);
+    }
+
+    .ob-btn-primary:hover:not(:disabled) {
+      background: #27272a;
+      border-color: #27272a;
+    }
+
+    .ob-btn-google {
+      background: #4285F4;
+      color: #ffffff;
+      border-color: #4285F4;
+    }
+
+    .ob-btn-google:hover:not(:disabled) {
+      background: #3367d6;
+      border-color: #3367d6;
+    }
+
+    .ob-btn-outline {
+      background: #ffffff;
+      color: var(--ob-fg);
+      border-color: var(--ob-border);
+    }
+
+    .ob-btn-outline:hover:not(:disabled) {
+      background: var(--ob-subtle-bg);
+      border-color: var(--ob-border-hover);
+    }
+
+    .ob-btn:disabled, .ob-btn.disabled-link {
+      opacity: 0.45;
+      pointer-events: none;
+      cursor: not-allowed;
+    }
+
+    .ob-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+      width: 100%;
+    }
+
+    /* Readiness List */
+    .ob-readiness-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin: 0 0 1.5rem 0;
+      padding: 0;
+    }
+
+    .ob-readiness-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.85rem 1rem;
+      background: var(--ob-subtle-bg);
+      border: 1px solid var(--ob-border);
+      border-radius: var(--ob-radius-sm);
+      gap: 0.5rem;
+    }
+
+    .ob-readiness-label {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--ob-fg);
+    }
+
+    /* Mode Toggle Segmented Control */
+    .ob-mode-toggle {
+      display: flex;
+      background: var(--ob-subtle-bg);
+      border: 1px solid var(--ob-border);
+      border-radius: var(--ob-radius-sm);
+      padding: 3px;
+      gap: 3px;
+      margin-bottom: 1.25rem;
+    }
+
+    .ob-mode-btn {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.45rem;
+      padding: 0.5rem 0.6rem;
+      border: none;
+      background: transparent;
+      border-radius: 6px;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: var(--ob-muted-fg);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .ob-mode-btn:hover {
+      color: var(--ob-fg);
+    }
+
+    .ob-mode-btn.active {
+      background: #ffffff;
+      color: var(--ob-fg);
+      font-weight: 600;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+    }
+
+    /* Inputs & Form Groups */
+    .ob-input {
+      display: block !important;
+      width: 100% !important;
+      height: 38px !important;
+      line-height: 38px !important;
+      padding: 0 0.85rem !important;
+      background: #ffffff !important;
+      border: 1px solid #e4e4e7 !important;
+      border-radius: 6px !important;
+      font-size: 0.875rem !important;
+      font-family: inherit !important;
+      color: #09090b !important;
+      outline: none !important;
+      -webkit-appearance: none !important;
+      -moz-appearance: none !important;
+      appearance: none !important;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+      box-sizing: border-box !important;
+    }
+
+    .ob-input:focus {
+      border-color: #09090b !important;
+      box-shadow: 0 0 0 2px rgba(9, 9, 11, 0.1) !important;
+      background: #ffffff !important;
+    }
+
+    .ob-input::placeholder {
+      color: #a1a1aa !important;
+      font-size: 0.875rem !important;
+    }
+
+    .ob-phone-input-group {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+      width: 100%;
+    }
+
+    .ob-phone-input-wrapper {
+      display: flex;
+      align-items: stretch;
+      flex: 1;
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 6px;
+      height: 40px;
+      min-height: 40px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+      overflow: hidden;
+      box-sizing: border-box;
+      padding: 0 !important;
+    }
+
+    .ob-phone-input-wrapper:focus-within {
+      border-color: #09090b;
+      box-shadow: 0 0 0 2px rgba(9, 9, 11, 0.1);
+    }
+
+    .ob-phone-prefix {
+      padding: 0 0.75rem;
+      height: 38px;
+      line-height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f4f4f5;
+      border-right: 1px solid #e4e4e7;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: #3f3f46;
+      user-select: none;
+      flex-shrink: 0;
+      box-sizing: border-box;
+      margin: 0 !important;
+    }
+
+    .ob-phone-input-wrapper input.ob-phone-input {
+      flex: 1;
+      width: 100% !important;
+      height: 38px !important;
+      line-height: 38px !important;
+      min-height: 38px !important;
+      max-height: 38px !important;
+      border: none !important;
+      box-shadow: none !important;
+      border-radius: 0 !important;
+      padding: 0 0.85rem !important;
+      font-size: 0.875rem !important;
+      font-family: inherit !important;
+      color: #09090b !important;
+      background: transparent !important;
+      outline: none !important;
+      -webkit-appearance: none !important;
+      -moz-appearance: none !important;
+      appearance: none !important;
+      margin: 0 !important;
+      box-sizing: border-box !important;
+      vertical-align: middle !important;
+    }
+
+    .ob-phone-input-wrapper input.ob-phone-input::placeholder {
+      color: #a1a1aa !important;
+      font-size: 0.875rem !important;
+      line-height: 38px !important;
+    }
+
+    .ob-phone-input-group .ob-btn {
+      height: 40px;
+      min-height: 40px;
+      padding: 0 1.15rem;
+      font-size: 0.875rem;
+      border-radius: 6px;
+    }
+
+    /* Pairing Code Box */
+    .ob-pairing-container {
+      padding: 1.25rem 1rem;
+      background: #fafafa;
+      border: 1px solid var(--ob-border);
+      border-radius: var(--ob-radius-sm);
+      margin-bottom: 1.25rem;
+    }
+
+    .ob-pairing-code-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #ffffff;
+      border: 1px solid var(--ob-border);
+      border-radius: 10px;
+      padding: 1.25rem 1rem;
+      margin: 1rem 0;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+    }
+
+    .ob-pairing-code-value {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 1.85rem;
+      font-weight: 700;
+      letter-spacing: 0.25em;
+      color: var(--ob-fg);
+      margin-bottom: 0.75rem;
+      user-select: all;
+      word-break: break-all;
+      text-align: center;
+    }
+
+    .ob-step-guide {
+      list-style: none;
+      padding: 0;
+      margin: 0.85rem 0 0 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+      text-align: left;
+    }
+
+    .ob-step-guide-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      font-size: 0.75rem;
+      color: var(--ob-muted-fg);
+      line-height: 1.35;
+    }
+
+    .ob-step-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--ob-subtle-bg);
+      color: var(--ob-fg);
+      font-weight: 700;
+      font-size: 0.65rem;
+      flex-shrink: 0;
+      margin-top: 1px;
+      border: 1px solid var(--ob-border);
+    }
+
+    @keyframes spin {
+      100% { transform: rotate(360deg); }
+    }
+
+    .mode-text-desktop {
+      display: inline;
+    }
+    .mode-text-mobile {
+      display: none;
+    }
+
+    /* Mobile Responsive Breakpoints */
+    @media (max-width: 520px) {
+      .mode-text-desktop {
+        display: none !important;
+      }
+      .mode-text-mobile {
+        display: inline !important;
+      }
+
+      .ob-wrapper {
+        margin: 1.25rem auto 2.5rem auto;
+        padding: 0 0.85rem;
+      }
+
+      .ob-header {
+        margin-bottom: 1.25rem;
+      }
+
+      .ob-title {
+        font-size: 1.25rem;
+      }
+
+      .ob-subtitle {
+        font-size: 0.8125rem;
+      }
+
+      .ob-stepper {
+        padding: 3px;
+        gap: 2px;
+        margin-bottom: 1.15rem;
+      }
+
+      .ob-step-tab {
+        padding: 0.5rem 0.25rem;
+        font-size: 0.72rem;
+        gap: 0.25rem;
+      }
+
+      .ob-step-icon {
+        width: 12px;
+        height: 12px;
+      }
+
+      .ob-card {
+        padding: 1.15rem 1rem;
+        border-radius: 12px;
+      }
+
+      .ob-card-header {
+        flex-direction: row;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+      }
+
+      .ob-card-title {
+        font-size: 0.95rem;
+      }
+
+      .ob-pill {
+        font-size: 0.7rem;
+        padding: 0.25rem 0.55rem;
+      }
+
+      .ob-mode-toggle {
+        padding: 3px;
+        gap: 3px;
+        margin-bottom: 1rem;
+      }
+
+      .ob-mode-btn {
+        padding: 0.5rem 0.35rem;
+        font-size: 0.76rem;
+        gap: 0.3rem;
+      }
+
+      .ob-qr-container {
+        padding: 1.15rem 0.75rem;
+      }
+
+      .ob-qr-frame {
+        width: 164px;
+        height: 164px;
+        padding: 8px;
+      }
+
+      .ob-phone-input-group {
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .ob-phone-input-wrapper {
+        width: 100%;
+        height: 40px;
+        min-height: 40px;
+      }
+
+      .ob-phone-input-group .ob-btn {
+        width: 100%;
+        height: 40px;
+        min-height: 40px;
+        font-size: 0.875rem;
+      }
+
+      .ob-pairing-code-value {
+        font-size: 1.5rem;
+        letter-spacing: 0.18em;
+      }
+
+      /* Stack action buttons cleanly on mobile */
+      .ob-actions {
+        flex-direction: column;
+        gap: 0.6rem;
+        margin-top: 1.25rem;
+      }
+
+      .ob-actions .ob-btn,
+      .ob-actions button,
+      .ob-actions a {
+        width: 100% !important;
+        margin-left: 0 !important;
+        min-height: 44px;
+        font-size: 0.875rem;
+      }
+
+      .ob-readiness-item {
+        padding: 0.75rem 0.85rem;
+      }
+
+      .ob-readiness-label {
+        font-size: 0.8125rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="ob-wrapper">
+
+    <!-- Header Section -->
+    <div class="ob-header">
+      <div style="display: flex; justify-content: flex-end; margin-bottom: 0.5rem;">
+        <form action="/logout" method="POST" style="margin: 0;">
+          <button type="submit" style="background: none; border: none; color: var(--ob-muted-fg); font-size: 0.75rem; cursor: pointer; display: inline-flex; align-items: center; gap: 0.25rem; font-family: inherit;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+            Logout
+          </button>
+        </form>
+      </div>
+      <% if (typeof channelInfo !== 'undefined' && channelInfo) { %>
+        <div class="ob-brand-badge">
+          Channel: <%= channelInfo.name %>
+        </div>
+      <% } %>
+      <h1 class="ob-title">Setup Onboarding</h1>
+      <p class="ob-subtitle">Complete setup for <strong><%= typeof channelInfo !== 'undefined' && channelInfo ? channelInfo.name : 'your channel' %></strong> to start capturing and syncing WhatsApp leads.</p>
+    </div>
+
+    <!-- Stepper Navigation -->
+    <div class="ob-stepper">
+      <a href="/app/<%= appSecret %>/onboarding?step=1" class="ob-step-tab <%= currentStep === 1 ? 'active' : (whatsAppConnected ? 'completed' : '') %>">
+        <svg class="ob-step-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+        </svg>
+        <span>1. WhatsApp</span>
+        <% if (whatsAppConnected && currentStep !== 1) { %>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+        <% } %>
+      </a>
+
+      <a href="/app/<%= appSecret %>/onboarding?step=2" class="ob-step-tab <%= currentStep === 2 ? 'active' : (googleSheetsConnected ? 'completed' : '') %>">
+        <svg class="ob-step-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+          <line x1="3" y1="9" x2="21" y2="9"/>
+          <line x1="3" y1="15" x2="21" y2="15"/>
+          <line x1="9" y1="3" x2="9" y2="21"/>
+        </svg>
+        <span>2. Sheets</span>
+        <% if (googleSheetsConnected && currentStep !== 2) { %>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+        <% } %>
+      </a>
+
+      <a href="/app/<%= appSecret %>/onboarding?step=3" class="ob-step-tab <%= currentStep === 3 ? 'active' : (onboardingState.onboarding_completed ? 'completed' : '') %>">
+        <svg class="ob-step-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="9"/>
+          <rect x="14" y="3" width="7" height="5"/>
+          <rect x="14" y="12" width="7" height="9"/>
+          <rect x="3" y="16" width="7" height="5"/>
+        </svg>
+        <span>3. Dashboard</span>
+      </a>
+    </div>
+
+    <% if (currentStep === 1) { %>
+      <!-- STEP 1: WhatsApp Connection -->
+      <div class="ob-card">
+        <div class="ob-card-header">
+          <h2 class="ob-card-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            Connect WhatsApp
+          </h2>
+          <span id="wa-status-badge" class="ob-pill <%= whatsAppConnected ? 'connected' : '' %>">
+            <span class="ob-pill-dot"></span>
+            <span id="wa-status-text"><%= whatsAppConnected ? 'Connected' : (waStatus.state === 'disconnected' ? 'Disconnected' : (waStatus.state === 'logged_out' ? 'Logged Out' : 'Not Connected')) %></span>
+          </span>
+        </div>
+
+        <!-- Mode Switcher (When Not Connected) -->
+        <div class="ob-mode-toggle <%= whatsAppConnected ? 'hidden' : '' %>" id="wa-mode-toggle">
+          <button type="button" class="ob-mode-btn active" id="mode-btn-qr" onclick="switchWAMode('qr')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            <span class="mode-text-desktop">Scan QR Code</span>
+            <span class="mode-text-mobile">QR Code</span>
+          </button>
+          <button type="button" class="ob-mode-btn" id="mode-btn-pairing" onclick="switchWAMode('pairing')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+            <span class="mode-text-desktop">Link with Phone Number</span>
+            <span class="mode-text-mobile">Pairing Code</span>
+          </button>
+        </div>
+
+        <!-- MODE A: QR Code View -->
+        <div id="wa-qr-view" class="<%= whatsAppConnected ? 'hidden' : '' %>">
+          <div class="ob-qr-container">
+            <div class="ob-qr-frame" id="qr-box-container">
+              <img id="live-qr-img" src="" alt="WhatsApp QR Code" style="display: none;" />
+              
+              <div id="qr-spinner" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; padding: 0.5rem;">
+                <svg id="qr-spin-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--ob-fg); animation: spin 1s linear infinite; margin-bottom: 0.4rem;">
+                  <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+                </svg>
+                <span id="qr-spinner-text" style="font-size: 0.72rem; color: var(--ob-muted-fg); line-height: 1.25;">Loading QR Code...</span>
+              </div>
+
+              <div id="qr-disconnected-box" style="display: none; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; padding: 0.5rem;">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 0.35rem;">
+                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+                <span style="font-size: 0.72rem; font-weight: 600; color: #b45309; line-height: 1.25; margin-bottom: 0.2rem;">Session Disconnected</span>
+                <span style="font-size: 0.65rem; color: var(--ob-muted-fg); line-height: 1.2;">Click "Request QR" below</span>
+              </div>
+            </div>
+
+            <p class="ob-qr-instruction" id="qr-instruction-text">
+              <%= waStatus.state === 'disconnected' || waStatus.state === 'logged_out' 
+                  ? 'Your session was disconnected. Click on the "Request QR / Reconnect" button below to generate a new QR code.' 
+                  : 'Open WhatsApp on your phone > Linked Devices > Scan QR code to connect.' %>
+            </p>
+          </div>
+        </div>
+
+        <!-- MODE B: Pairing Code View -->
+        <div id="wa-pairing-view" class="hidden" style="display: none;">
+          <div class="ob-pairing-container">
+            <!-- Pairing Input Section (Hidden once code is generated) -->
+            <div id="pairing-input-section" class="<%= (typeof waStatus !== 'undefined' && waStatus.pairingCodeAvailable && waStatus.pairingCode) ? 'hidden' : '' %>">
+              <div style="margin-bottom: 0.85rem; text-align: left;">
+                <label for="pairing-phone-input" style="display: block; font-size: 0.8125rem; font-weight: 600; color: #09090b; margin-bottom: 0.25rem;">
+                  WhatsApp Phone Number
+                </label>
+                <p style="font-size: 0.75rem; color: var(--ob-muted-fg); margin: 0; line-height: 1.35;">
+                  Enter your 10-digit WhatsApp phone number.
+                </p>
+              </div>
+
+              <form id="pairing-code-form" onsubmit="event.preventDefault(); requestPairingCode();">
+                <div class="ob-phone-input-group">
+                  <div class="ob-phone-input-wrapper">
+                    <span class="ob-phone-prefix">+91</span>
+                    <input 
+                      type="tel" 
+                      id="pairing-phone-input" 
+                      placeholder="9876543210" 
+                      class="ob-phone-input" 
+                      maxlength="10"
+                      value="<%= (typeof waStatus !== 'undefined' && waStatus.pairingPhone) ? waStatus.pairingPhone.replace(/^91/, '') : '' %>" 
+                      autocomplete="tel-national"
+                      required 
+                    />
+                  </div>
+                  <button type="submit" id="get-pairing-code-btn" class="ob-btn ob-btn-primary" style="flex-shrink: 0;">
+                    <span id="pairing-btn-text">Get Code</span>
+                    <svg id="pairing-btn-spinner" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: none; animation: spin 1s linear infinite;">
+                      <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+                    </svg>
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <div id="pairing-error-msg" style="display: none; font-size: 0.78rem; color: #dc2626; margin-top: 0.5rem; margin-bottom: 0.75rem; text-align: left; padding: 0.5rem 0.65rem; background: #fef2f2; border: 1px solid #fecaca; border-radius: 6px;"></div>
+
+            <!-- Pairing Code Display Card (Shows when code is generated) -->
+            <div id="pairing-code-display-card" class="<%= (typeof waStatus !== 'undefined' && waStatus.pairingCodeAvailable && waStatus.pairingCode) ? '' : 'hidden' %>">
+              <div class="ob-pairing-code-card">
+                <div style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; color: var(--ob-muted-fg); margin-bottom: 0.4rem;">
+                  Your Pairing Code
+                </div>
+                <div class="ob-pairing-code-value" id="pairing-code-value">
+                  <%= (typeof waStatus !== 'undefined' && waStatus.pairingCode) ? waStatus.pairingCode : '---- - ----' %>
+                </div>
+                <button type="button" class="ob-btn ob-btn-outline" id="copy-pairing-code-btn" onclick="copyPairingCode()" style="height: 22px; min-height: 22px; font-size: 0.6875rem; padding: 0 0.5rem; border-radius: 4px; gap: 0.25rem; font-weight: 500;">
+                  <svg id="copy-code-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                  <span id="copy-code-text">Copy Code</span>
+                </button>
+              </div>
+
+              <div class="ob-step-guide">
+                <div class="ob-step-guide-item">
+                  <span class="ob-step-num">1</span>
+                  <span>Open <strong>WhatsApp</strong> on your phone.</span>
+                </div>
+                <div class="ob-step-guide-item">
+                  <span class="ob-step-num">2</span>
+                  <span>Tap <strong>Settings</strong> (or <strong>⋮</strong>) &gt; <strong>Linked Devices</strong>.</span>
+                </div>
+                <div class="ob-step-guide-item">
+                  <span class="ob-step-num">3</span>
+                  <span>Tap <strong>Link a device</strong> &gt; <strong>"Link with phone number instead"</strong>.</span>
+                </div>
+                <div class="ob-step-guide-item">
+                  <span class="ob-step-num">4</span>
+                  <span>Enter the <strong>8-character code</strong> above into WhatsApp.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Connected Success Card (Shows when WhatsApp connects) -->
+        <div id="wa-connected-info" class="<%= whatsAppConnected ? '' : 'hidden' %>" style="padding: 1.25rem 0; text-align: center;">
+          <div style="width: 48px; height: 48px; background: #dcfce7; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 0.75rem; color: #16a34a;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <h3 style="font-size: 1.15rem; font-weight: 600; color: #09090b; margin-bottom: 0.35rem;">
+            WhatsApp Connected Successfully!
+          </h3>
+          <p style="font-size: 0.875rem; color: var(--ob-muted-fg); margin-bottom: 0.25rem;">
+            Linked Account: <strong id="wa-phone-num" style="color: #09090b;"><%= waStatus.connectedNumber ? (waStatus.connectedNumber.startsWith('+') ? waStatus.connectedNumber : '+' + waStatus.connectedNumber) : 'Active' %></strong>
+          </p>
+          <p style="font-size: 0.8125rem; color: #16a34a; font-weight: 500; margin-top: 0.5rem;">
+            ✓ WhatsApp connection active & capturing incoming leads.
+          </p>
+        </div>
+
+        <div class="ob-actions">
+          <button id="reconnect-btn" class="ob-btn ob-btn-outline <%= whatsAppConnected ? 'hidden' : '' %>" onclick="requestReconnect()">
+            <svg id="reconnect-btn-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+            <span id="reconnect-btn-text">Request QR / Reconnect</span>
+          </button>
+
+          <a id="next-step-2-btn" href="/app/<%= appSecret %>/onboarding?step=2" class="ob-btn ob-btn-primary <%= !whatsAppConnected ? 'disabled-link' : '' %>" style="margin-left: auto;">
+            <span>Next: Google Sheets</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </a>
+        </div>
+      </div>
+
+    <% } else if (currentStep === 2) { %>
+      <!-- STEP 2: Google Sheets Connection -->
+      <div class="ob-card">
+        <div class="ob-card-header">
+          <h2 class="ob-card-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+            Connect Google Sheets
+          </h2>
+          <span class="ob-pill <%= googleSheetsConnected ? 'connected' : '' %>">
+            <span class="ob-pill-dot"></span>
+            <%= googleSheetsConnected ? 'Connected' : 'Not Connected' %>
+          </span>
+        </div>
+
+        <p style="font-size: 0.8125rem; color: var(--ob-muted-fg); margin-bottom: 1.25rem;">
+          LeadPush automatically creates and formats a dedicated "WhatsApp Leads" spreadsheet in your Google Drive.
+        </p>
+
+        <div>
+          <% if (!googleConn || googleConn.connection_status !== 'connected') { %>
+            <div style="text-align: center; padding: 1.25rem; background: var(--ob-subtle-bg); border-radius: var(--ob-radius-sm); margin-bottom: 1.25rem;">
+              <p style="margin-bottom: 1rem; color: var(--ob-muted-fg); font-size: 0.8125rem;">Connect your Google account to grant permission for lead syncing.</p>
+              <a href="/oauth/google/connect" class="ob-btn ob-btn-google">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 15.96 0 12.48 0 5.8 0 0 5.8 0 12.48s5.8 12.48 12.48 12.48c3.6 0 6.64-1.187 8.88-3.52 2.32-2.32 3.04-5.56 3.04-8.213 0-.8-.067-1.547-.187-2.307H12.48z"/></svg>
+                <span>Connect Google Account</span>
+              </a>
+            </div>
+          <% } else { %>
+            <div style="margin-bottom: 1.25rem; padding: 0.85rem 1rem; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: var(--ob-radius-sm);">
+              <div style="font-weight: 600; color: #166534; font-size: 0.85rem; display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.2rem;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                Google Account Connected
+              </div>
+              <div style="font-size: 0.8125rem; color: #15803d;"><%= googleConn.google_email || 'Connected' %></div>
+              <% if (googleConn.spreadsheet_name) { %>
+                <div style="font-size: 0.75rem; color: #166534; margin-top: 0.35rem; font-weight: 500;">Active Sheet: <%= googleConn.spreadsheet_name %> (<%= googleConn.sheet_tab_name || 'Leads' %>)</div>
+              <% } %>
+            </div>
+
+            <form id="create-sheet-form" style="margin-bottom: 1.25rem;">
+              <input type="hidden" name="mode" value="create_new">
+              <button type="submit" id="create-sheet-btn" class="ob-btn ob-btn-google" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                <svg id="create-sheet-spinner-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: none; animation: spin 1s linear infinite;">
+                  <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+                </svg>
+                <span id="create-sheet-btn-text">Create "WhatsApp Leads" Spreadsheet</span>
+                <svg id="create-sheet-btn-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
+              <div id="create-sheet-msg" style="display: none; font-size: 0.75rem; margin-top: 0.5rem; text-align: center; color: #dc2626;"></div>
+            </form>
+          <% } %>
+
+          <div class="ob-actions">
+            <a href="/app/<%= appSecret %>/onboarding?step=1" class="ob-btn ob-btn-outline">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+              <span>Back</span>
+            </a>
+            <a id="next-step-3-btn" href="/app/<%= appSecret %>/onboarding?step=3" class="ob-btn ob-btn-primary <%= !googleSheetsConnected ? 'disabled-link' : '' %>">
+              <span>Next: Dashboard</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+
+    <% } else if (currentStep === 3) { %>
+      <!-- STEP 3: Dashboard Readiness -->
+      <div class="ob-card">
+        <div class="ob-card-header">
+          <h2 class="ob-card-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Setup Readiness Summary
+          </h2>
+          <span class="ob-pill <%= (whatsAppConnected && googleSheetsConnected) ? 'connected' : '' %>">
+            <span class="ob-pill-dot"></span>
+            <%= (whatsAppConnected && googleSheetsConnected) ? 'Ready' : 'Incomplete' %>
+          </span>
+        </div>
+
+        <ul class="ob-readiness-list">
+          <li class="ob-readiness-item">
+            <span class="ob-readiness-label">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              WhatsApp Channel
+            </span>
+            <span class="ob-pill <%= whatsAppConnected ? 'connected' : '' %>">
+              <span class="ob-pill-dot"></span>
+              <%= whatsAppConnected ? 'Connected' : 'Not Connected' %>
+            </span>
+          </li>
+          <li class="ob-readiness-item">
+            <span class="ob-readiness-label">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+              Google Sheets Channel
+            </span>
+            <span class="ob-pill <%= googleSheetsConnected ? 'connected' : '' %>">
+              <span class="ob-pill-dot"></span>
+              <%= googleSheetsConnected ? 'Connected' : 'Not Connected' %>
+            </span>
+          </li>
+        </ul>
+
+        <form action="/app/<%= appSecret %>/onboarding/complete" method="POST" class="ob-actions">
+          <a href="/app/<%= appSecret %>/onboarding?step=2" class="ob-btn ob-btn-outline">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+            <span>Back</span>
+          </a>
+          <button type="submit" class="ob-btn ob-btn-primary" <%= (!whatsAppConnected || !googleSheetsConnected) ? 'disabled' : '' %>>
+            <span>Open Dashboard</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </form>
+      </div>
+    <% } %>
+
+  </div>
+
+  <% if (currentStep === 1) { %>
+    <script>
+      (function() {
+        const secret = "<%= appSecret %>";
+
+        let currentWAMode = 'qr';
+
+        window.switchWAMode = function(mode) {
+          currentWAMode = mode;
+          const btnQr = document.getElementById('mode-btn-qr');
+          const btnPairing = document.getElementById('mode-btn-pairing');
+          const viewQr = document.getElementById('wa-qr-view');
+          const viewPairing = document.getElementById('wa-pairing-view');
+          const statusText = document.getElementById('wa-status-text');
+          const badge = document.getElementById('wa-status-badge');
+          const reconnectBtn = document.getElementById('reconnect-btn');
+
+          if (mode === 'qr') {
+            if (btnQr) btnQr.className = 'ob-mode-btn active';
+            if (btnPairing) btnPairing.className = 'ob-mode-btn';
+            if (viewQr) { viewQr.style.display = 'block'; viewQr.classList.remove('hidden'); }
+            if (viewPairing) { viewPairing.style.display = 'none'; viewPairing.classList.add('hidden'); }
+            if (reconnectBtn && (!badge || !badge.classList.contains('connected'))) {
+              reconnectBtn.style.display = 'inline-flex';
+              reconnectBtn.classList.remove('hidden');
+            }
+            if (statusText && badge && !badge.classList.contains('connected')) {
+              statusText.textContent = 'Scan QR Code';
+            }
+          } else {
+            if (btnQr) btnQr.className = 'ob-mode-btn';
+            if (btnPairing) btnPairing.className = 'ob-mode-btn active';
+            if (viewQr) { viewQr.style.display = 'none'; viewQr.classList.add('hidden'); }
+            if (viewPairing) { viewPairing.style.display = 'block'; viewPairing.classList.remove('hidden'); }
+            if (reconnectBtn) {
+              reconnectBtn.style.display = 'none';
+              reconnectBtn.classList.add('hidden');
+            }
+            if (statusText && badge && !badge.classList.contains('connected')) {
+              statusText.textContent = 'Pairing Code';
+            }
+            const input = document.getElementById('pairing-phone-input');
+            if (input) input.focus();
+          }
+        };
+
+        window.requestPairingCode = async function() {
+          const phoneInput = document.getElementById('pairing-phone-input');
+          const inputDigits = phoneInput ? phoneInput.value.replace(/\D/g, '') : '';
+          const errorMsg = document.getElementById('pairing-error-msg');
+          const btn = document.getElementById('get-pairing-code-btn');
+          const btnText = document.getElementById('pairing-btn-text');
+          const spinner = document.getElementById('pairing-btn-spinner');
+          const inputSection = document.getElementById('pairing-input-section');
+          const displayCard = document.getElementById('pairing-code-display-card');
+          const codeValue = document.getElementById('pairing-code-value');
+
+          if (!inputDigits || inputDigits.length !== 10) {
+            if (errorMsg) {
+              errorMsg.style.display = 'block';
+              errorMsg.textContent = 'Please enter a valid 10-digit phone number.';
+            }
+            if (phoneInput) phoneInput.focus();
+            return;
+          }
+
+          const fullPhone = '91' + inputDigits;
+
+          if (errorMsg) errorMsg.style.display = 'none';
+          if (btn) btn.disabled = true;
+          if (btnText) btnText.textContent = 'Generating...';
+          if (spinner) spinner.style.display = 'inline-block';
+
+          try {
+            const res = await fetch(`/app/${secret}/whatsapp/pairing-code`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ phone: fullPhone })
+            });
+            const data = await res.json();
+            if (data.ok && data.code) {
+              if (codeValue) codeValue.textContent = data.code;
+              if (inputSection) {
+                inputSection.style.display = 'none';
+                inputSection.classList.add('hidden');
+              }
+              if (displayCard) {
+                displayCard.style.display = 'block';
+                displayCard.classList.remove('hidden');
+              }
+            } else {
+              throw new Error(data.error || 'Failed to generate pairing code');
+            }
+          } catch (err) {
+            if (errorMsg) {
+              errorMsg.style.display = 'block';
+              errorMsg.textContent = err.message || 'Error generating pairing code. Please check your phone number.';
+            }
+          } finally {
+            if (btn) btn.disabled = false;
+            if (btnText) btnText.textContent = 'Get Code';
+            if (spinner) spinner.style.display = 'none';
+          }
+        };
+
+        window.changePairingNumber = function() {
+          const inputSection = document.getElementById('pairing-input-section');
+          const displayCard = document.getElementById('pairing-code-display-card');
+          const errorMsg = document.getElementById('pairing-error-msg');
+          const phoneInput = document.getElementById('pairing-phone-input');
+
+          if (displayCard) {
+            displayCard.style.display = 'none';
+            displayCard.classList.add('hidden');
+          }
+          if (inputSection) {
+            inputSection.style.display = 'block';
+            inputSection.classList.remove('hidden');
+          }
+          if (errorMsg) errorMsg.style.display = 'none';
+          if (phoneInput) {
+            phoneInput.focus();
+            phoneInput.select();
+          }
+        };
+
+        window.copyPairingCode = function() {
+          const codeValue = document.getElementById('pairing-code-value');
+          const rawCode = codeValue ? codeValue.textContent.trim() : '';
+          if (!rawCode) return;
+
+          // Copy both cleanly with or without dashes
+          navigator.clipboard.writeText(rawCode).then(() => {
+            const copyText = document.getElementById('copy-code-text');
+            const original = copyText ? copyText.textContent : 'Copy Code';
+            if (copyText) copyText.textContent = '✓ Copied!';
+            setTimeout(() => {
+              if (copyText) copyText.textContent = original;
+            }, 2000);
+          }).catch(() => {
+            // fallback
+          });
+        };
+
+        async function pollWhatsAppStatus() {
+          try {
+            const res = await fetch(`/app/${secret}/api/whatsapp-status`);
+            const data = await res.json();
+            if (!data.ok) return;
+
+            const badge = document.getElementById('wa-status-badge');
+            const statusText = document.getElementById('wa-status-text');
+            const qrImg = document.getElementById('live-qr-img');
+            const qrSpinner = document.getElementById('qr-spinner');
+            const qrSpinnerText = document.getElementById('qr-spinner-text');
+            const qrDisconnectedBox = document.getElementById('qr-disconnected-box');
+            const connectedInfo = document.getElementById('wa-connected-info');
+            const phoneNum = document.getElementById('wa-phone-num');
+            const nextBtn = document.getElementById('next-step-2-btn');
+            const instructionText = document.getElementById('qr-instruction-text');
+            const reconnectBtn = document.getElementById('reconnect-btn');
+            const qrBoxContainer = document.getElementById('qr-box-container');
+            const modeToggle = document.getElementById('wa-mode-toggle');
+            const qrView = document.getElementById('wa-qr-view');
+            const pairingView = document.getElementById('wa-pairing-view');
+            const pairingCard = document.getElementById('pairing-code-display-card');
+            const pairingCodeValue = document.getElementById('pairing-code-value');
+
+            if (data.state === 'connected') {
+              badge.className = 'ob-pill connected';
+              statusText.textContent = 'Connected';
+              if (modeToggle) { modeToggle.style.display = 'none'; modeToggle.classList.add('hidden'); }
+              if (qrView) { qrView.style.display = 'none'; qrView.classList.add('hidden'); }
+              if (pairingView) { pairingView.style.display = 'none'; pairingView.classList.add('hidden'); }
+              if (connectedInfo) {
+                connectedInfo.style.display = 'block';
+                connectedInfo.classList.remove('hidden');
+              }
+              if (phoneNum) {
+                const rawNum = data.connectedNumber || '';
+                phoneNum.textContent = rawNum ? (rawNum.startsWith('+') ? rawNum : '+' + rawNum) : 'Active';
+              }
+              if (nextBtn) {
+                nextBtn.classList.remove('disabled-link');
+                nextBtn.removeAttribute('disabled');
+              }
+              if (reconnectBtn) {
+                reconnectBtn.style.display = 'none';
+                reconnectBtn.classList.add('hidden');
+              }
+            } else {
+              if (connectedInfo) {
+                connectedInfo.style.display = 'none';
+                connectedInfo.classList.add('hidden');
+              }
+              if (modeToggle) {
+                modeToggle.style.display = 'flex';
+                modeToggle.classList.remove('hidden');
+              }
+
+              if (reconnectBtn) {
+                if (currentWAMode === 'qr') {
+                  reconnectBtn.style.display = 'inline-flex';
+                  reconnectBtn.classList.remove('hidden');
+                } else {
+                  reconnectBtn.style.display = 'none';
+                  reconnectBtn.classList.add('hidden');
+                }
+              }
+
+              if (currentWAMode === 'qr' && qrView) {
+                qrView.style.display = 'block';
+                qrView.classList.remove('hidden');
+              } else if (currentWAMode === 'pairing' && pairingView) {
+                pairingView.style.display = 'block';
+                pairingView.classList.remove('hidden');
+              }
+
+              if (data.pairingCode && pairingCodeValue && pairingCard) {
+                pairingCodeValue.textContent = data.pairingCode;
+                pairingCard.style.display = 'block';
+                pairingCard.classList.remove('hidden');
+              }
+
+              if (data.state === 'connecting') {
+                badge.className = 'ob-pill';
+                statusText.textContent = 'Connecting...';
+                if (qrBoxContainer) {
+                  qrBoxContainer.style.display = 'flex';
+                  qrBoxContainer.classList.remove('hidden');
+                }
+                if (qrImg) qrImg.style.display = 'none';
+                if (qrDisconnectedBox) qrDisconnectedBox.style.display = 'none';
+                if (qrSpinner) qrSpinner.style.display = 'flex';
+                if (qrSpinnerText) qrSpinnerText.textContent = 'Connecting to WhatsApp...';
+                if (instructionText) {
+                  instructionText.style.display = 'block';
+                  instructionText.classList.remove('hidden');
+                  instructionText.textContent = 'Hold on while WhatsApp links your device...';
+                }
+              } else if (data.state === 'waiting_for_qr' || data.qrAvailable) {
+                badge.className = 'ob-pill';
+                statusText.textContent = currentWAMode === 'pairing' ? 'Pairing Code' : 'Scan QR Code';
+                if (qrBoxContainer) {
+                  qrBoxContainer.style.display = 'flex';
+                  qrBoxContainer.classList.remove('hidden');
+                }
+                if (qrDisconnectedBox) qrDisconnectedBox.style.display = 'none';
+                if (instructionText) {
+                  instructionText.style.display = 'block';
+                  instructionText.classList.remove('hidden');
+                  instructionText.textContent = 'Open WhatsApp on your phone > Linked Devices > Scan QR code to connect.';
+                }
+                fetchQR();
+              } else if (data.state === 'disconnected') {
+                badge.className = 'ob-pill';
+                statusText.textContent = 'Disconnected';
+                if (qrBoxContainer) {
+                  qrBoxContainer.style.display = 'flex';
+                  qrBoxContainer.classList.remove('hidden');
+                }
+                if (qrImg) qrImg.style.display = 'none';
+                if (qrSpinner) qrSpinner.style.display = 'none';
+                if (qrDisconnectedBox) qrDisconnectedBox.style.display = 'flex';
+                if (instructionText) {
+                  instructionText.style.display = 'block';
+                  instructionText.classList.remove('hidden');
+                  instructionText.innerHTML = 'Session was disconnected. Click on <strong>"Request QR / Reconnect"</strong> below to generate a new QR code.';
+                }
+              } else if (data.state === 'logged_out') {
+                badge.className = 'ob-pill';
+                statusText.textContent = 'Logged Out';
+                if (qrBoxContainer) {
+                  qrBoxContainer.style.display = 'flex';
+                  qrBoxContainer.classList.remove('hidden');
+                }
+                if (qrImg) qrImg.style.display = 'none';
+                if (qrSpinner) qrSpinner.style.display = 'none';
+                if (qrDisconnectedBox) qrDisconnectedBox.style.display = 'flex';
+                if (instructionText) {
+                  instructionText.style.display = 'block';
+                  instructionText.classList.remove('hidden');
+                  instructionText.innerHTML = 'Session was logged out. Click on <strong>"Request QR / Reconnect"</strong> below to scan a new QR code.';
+                }
+              }
+            }
+          } catch (e) {
+            console.error('Error polling status:', e);
+          }
+        }
+
+        async function fetchQR() {
+          try {
+            const res = await fetch(`/app/${secret}/whatsapp/qr`);
+            if (res.ok) {
+              const data = await res.json();
+              if (data.ok && data.qr) {
+                const qrImg = document.getElementById('live-qr-img');
+                const qrSpinner = document.getElementById('qr-spinner');
+                const qrDisconnectedBox = document.getElementById('qr-disconnected-box');
+                if (qrImg) {
+                  qrImg.src = data.qr;
+                  qrImg.style.display = 'block';
+                }
+                if (qrSpinner) qrSpinner.style.display = 'none';
+                if (qrDisconnectedBox) qrDisconnectedBox.style.display = 'none';
+              }
+            }
+          } catch (e) {
+            console.error('Error fetching QR:', e);
+          }
+        }
+
+        window.requestReconnect = async function() {
+          const btn = document.getElementById('reconnect-btn');
+          const btnText = document.getElementById('reconnect-btn-text');
+          const btnIcon = document.getElementById('reconnect-btn-icon');
+          if (btn) btn.disabled = true;
+          if (btnText) btnText.textContent = 'Requesting QR...';
+          if (btnIcon) btnIcon.style.animation = 'spin 1s linear infinite';
+
+          try {
+            await fetch(`/app/${secret}/whatsapp/reconnect`, { method: 'POST' });
+            pollWhatsAppStatus();
+          } catch (e) {
+            console.error('Error requesting reconnect:', e);
+          } finally {
+            setTimeout(() => {
+              if (btn) btn.disabled = false;
+              if (btnText) btnText.textContent = 'Request QR / Reconnect';
+              if (btnIcon) btnIcon.style.animation = 'none';
+            }, 3000);
+          }
+        };
+
+        pollWhatsAppStatus();
+        setInterval(pollWhatsAppStatus, 2000);
+      })();
+    </script>
+  <% } else if (currentStep === 2) { %>
+    <script>
+      (function() {
+        const secret = "<%= appSecret %>";
+        const isConnected = "<%= googleSheetsConnected %>" === "true";
+
+        const createForm = document.getElementById('create-sheet-form');
+        const createBtn = document.getElementById('create-sheet-btn');
+        const createBtnText = document.getElementById('create-sheet-btn-text');
+        const createMsg = document.getElementById('create-sheet-msg');
+        const nextBtn = document.getElementById('next-step-3-btn');
+
+        if (createForm) {
+          createForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const spinnerIcon = document.getElementById('create-sheet-spinner-icon');
+            const btnIcon = document.getElementById('create-sheet-btn-icon');
+
+            if (createBtn) {
+              createBtn.disabled = true;
+              createBtn.style.opacity = '0.75';
+              if (spinnerIcon) spinnerIcon.style.display = 'inline-block';
+              if (btnIcon) btnIcon.style.display = 'none';
+            }
+            if (createMsg) {
+              createMsg.style.display = 'none';
+            }
+
+            try {
+              const res = await fetch(`/app/${secret}/google/setup-sheet`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Accept': 'application/json'
+                },
+                body: JSON.stringify({ mode: 'create_new' })
+              });
+
+              const data = await res.json();
+              if (data.ok) {
+                if (data.sheetUrl) {
+                  window.open(data.sheetUrl, '_blank');
+                }
+                window.location.href = data.nextStepUrl || `/app/${secret}/onboarding?step=3`;
+              } else {
+                throw new Error(data.error || 'Failed to create spreadsheet');
+              }
+            } catch (err) {
+              console.error('Error creating spreadsheet:', err);
+              if (createBtn) {
+                createBtn.disabled = false;
+                createBtn.style.opacity = '1';
+                if (spinnerIcon) spinnerIcon.style.display = 'none';
+                if (btnIcon) btnIcon.style.display = 'inline-block';
+              }
+              if (createMsg) {
+                createMsg.style.display = 'block';
+                createMsg.textContent = err.message || 'Error creating sheet. Please try again.';
+              }
+            }
+          });
+        }
+
+        function startPollingGoogleStatus() {
+          const interval = setInterval(async () => {
+            try {
+              const res = await fetch(`/app/${secret}/api/google/status`);
+              const data = await res.json();
+              if (data.ok && data.googleSheetsConnected) {
+                clearInterval(interval);
+                window.location.reload();
+              }
+            } catch (e) {
+              console.error('Error polling Google status:', e);
+            }
+          }, 3000);
+        }
+
+        if (!isConnected && !createForm) {
+          startPollingGoogleStatus();
+        }
+      })();
+    </script>
+  <% } %>
+</body>
+</html>

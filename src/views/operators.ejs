@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= appTitle %> - Operators</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <%- include('partials/admin_sidebar') %>
+
+  <div class="app-container">
+    <main class="main-content admin-page-container">
+      <!-- Top Bar -->
+      <div class="admin-header-bar">
+        <div class="admin-header-left">
+          <button type="button" class="sidebar-toggle-btn" onclick="toggleAdminSidebar()" aria-label="Toggle Navigation Drawer" title="Toggle Sidebar">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect width="18" height="18" x="3" y="3" rx="2"></rect>
+              <line x1="9" y1="3" x2="9" y2="21"></line>
+              <path d="m14 9 3 3-3 3"></path>
+            </svg>
+          </button>
+          <div>
+            <h1 class="admin-title">
+              Operators
+            </h1>
+            <p class="admin-subtitle">
+              Manage operator accounts and channel assignments.
+            </p>
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <a href="/admin/operators/create" class="btn" style="background: var(--accent-blue); color: #ffffff; padding: 0.55rem 1rem; font-size: 0.8125rem; font-weight: 600; border: none; border-radius: var(--radius-md); text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem; box-shadow: var(--shadow-sm);">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            Create Operator
+          </a>
+        </div>
+      </div>
+
+      <!-- Feedback -->
+      <% if (notice === 'operator_created') { %>
+        <div style="background: var(--badge-success-bg); color: var(--badge-success-text); padding: 0.75rem 1rem; border-radius: var(--radius-md); margin-bottom: 1.5rem; font-size: 0.875rem; font-weight: 500; display: flex; align-items: center; gap: 0.5rem;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          Operator created successfully.
+        </div>
+      <% } else if (notice === 'operator_reassigned') { %>
+        <div style="background: var(--badge-success-bg); color: var(--badge-success-text); padding: 0.75rem 1rem; border-radius: var(--radius-md); margin-bottom: 1.5rem; font-size: 0.875rem; font-weight: 500; display: flex; align-items: center; gap: 0.5rem;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          Operator channel reassigned successfully.
+        </div>
+      <% } else if (notice === 'operator_deassigned') { %>
+        <div style="background: var(--badge-success-bg); color: var(--badge-success-text); padding: 0.75rem 1rem; border-radius: var(--radius-md); margin-bottom: 1.5rem; font-size: 0.875rem; font-weight: 500; display: flex; align-items: center; gap: 0.5rem;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          Operator unassigned successfully.
+        </div>
+      <% } else if (notice === 'operator_deleted') { %>
+        <div style="background: var(--badge-success-bg); color: var(--badge-success-text); padding: 0.75rem 1rem; border-radius: var(--radius-md); margin-bottom: 1.5rem; font-size: 0.875rem; font-weight: 500; display: flex; align-items: center; gap: 0.5rem;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          Operator deleted successfully.
+        </div>
+      <% } %>
+
+      <% if (error === 'channel_already_assigned') { %>
+        <div style="background: var(--badge-danger-bg); color: var(--badge-danger-text); padding: 0.75rem 1rem; border-radius: var(--radius-md); margin-bottom: 1.5rem; font-size: 0.875rem; font-weight: 500;">
+          Target channel is already assigned to another operator.
+        </div>
+      <% } else if (error === 'reassign_failed') { %>
+        <div style="background: var(--badge-danger-bg); color: var(--badge-danger-text); padding: 0.75rem 1rem; border-radius: var(--radius-md); margin-bottom: 1.5rem; font-size: 0.875rem; font-weight: 500;">
+          Failed to reassign operator. Please try again.
+        </div>
+      <% } else if (error === 'delete_failed') { %>
+        <div style="background: var(--badge-danger-bg); color: var(--badge-danger-text); padding: 0.75rem 1rem; border-radius: var(--radius-md); margin-bottom: 1.5rem; font-size: 0.875rem; font-weight: 500;">
+          Failed to delete operator. Please try again.
+        </div>
+      <% } %>
+
+      <!-- Operators List -->
+      <div style="display: flex; flex-direction: column; gap: 1rem;">
+        <% if (operators && operators.length > 0) { %>
+          <% operators.forEach(op => { %>
+            <div class="admin-card-row">
+              <div style="display: flex; flex-direction: column; gap: 0.35rem; width: 100%;">
+                <div style="display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;">
+                  <span style="font-size: 1.0625rem; font-weight: 600; color: #09090b;">
+                    <%= op.name %>
+                  </span>
+                  <span style="display: inline-flex; align-items: center; padding: 0.2rem 0.55rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; text-transform: capitalize; background: var(--badge-success-bg); color: var(--badge-success-text);">
+                    <%= op.status %>
+                  </span>
+                </div>
+                <div class="admin-meta-tags">
+                  <span>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 0.25rem;"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72"></path></svg>
+                    <%= op.phone_number %>
+                  </span>
+                  <span>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 0.25rem;"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+                    <strong style="color: #09090b;"><%= op.channel_name %></strong>
+                  </span>
+                  <span><strong>Created:</strong> <%= op.created_at_formatted %></span>
+                </div>
+              </div>
+
+              <div class="admin-actions-group">
+                <button type="button" class="btn btn-reassign-operator" data-op-id="<%= op.id %>" data-op-name="<%= op.name %>" data-channel-id="<%= op.channel_id || '' %>" style="background: #ffffff; color: var(--text-muted); border: 1px solid var(--border-color); padding: 0.45rem 0.75rem; font-size: 0.8125rem; font-weight: 500; border-radius: var(--radius-md); box-shadow: var(--shadow-sm); cursor: pointer; display: inline-flex; align-items: center; gap: 0.35rem;">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><polyline points="16 11 18 13 22 9"></polyline></svg>
+                  Assign / Reassign
+                </button>
+                <button type="button" class="btn btn-delete-operator" data-op-id="<%= op.id %>" data-op-name="<%= op.name %>" style="background: #fff1f2; color: #e11d48; border: 1px solid #fecdd3; padding: 0.45rem 0.75rem; font-size: 0.8125rem; font-weight: 600; border-radius: var(--radius-md); cursor: pointer; display: inline-flex; align-items: center; gap: 0.35rem;">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                  Delete
+                </button>
+              </div>
+            </div>
+          <% }); %>
+        <% } else { %>
+          <div style="text-align: center; padding: 3rem 1.5rem; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); color: var(--text-muted);">
+            <p style="font-size: 0.9375rem; margin-bottom: 1rem;">No operators yet.</p>
+            <a href="/admin/operators/create" class="btn" style="background: var(--accent-blue); color: #ffffff; padding: 0.5rem 1rem; font-size: 0.8125rem; font-weight: 600; border-radius: var(--radius-md); text-decoration: none;">
+              Create First Operator
+            </a>
+          </div>
+        <% } %>
+      </div>
+    </main>
+
+    <!-- Reassign Operator Modal -->
+    <div id="reassignModal" style="display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center; padding: 1.25rem; box-sizing: border-box;">
+      <div style="background: #ffffff; width: 100%; max-width: 440px; border-radius: var(--radius-lg); padding: 1.75rem 1.5rem; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04); border: 1px solid var(--border-color); box-sizing: border-box;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+          <h2 style="font-size: 1.15rem; font-weight: 700; color: #09090b; margin: 0;">
+            Reassign Channel
+          </h2>
+          <button type="button" onclick="closeReassignModal()" style="background: none; border: none; cursor: pointer; color: var(--text-muted); padding: 0.25rem; display: flex; align-items: center; justify-content: center;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+
+        <p style="font-size: 0.875rem; color: var(--text-muted); margin: 0 0 1.25rem 0;">
+          Select a channel to assign to <strong id="reassignOpName" style="color: #09090b;"></strong>, or unassign them completely.
+        </p>
+
+        <form id="reassignForm" method="POST" action="">
+          <div style="margin-bottom: 1.5rem;">
+            <label for="reassignChannelSelect" style="display: block; font-size: 0.8125rem; font-weight: 600; color: #09090b; margin-bottom: 0.4rem;">
+              Target Channel
+            </label>
+            <select id="reassignChannelSelect" name="channel_id" style="width: 100%; padding: 0.65rem 0.85rem; border: 1px solid var(--border-color); border-radius: var(--radius-md); font-size: 0.875rem; font-family: inherit; color: var(--text-main); outline: none; background: #ffffff; cursor: pointer; box-sizing: border-box;">
+              <option value="">— Unassign (No channel) —</option>
+              <% if (typeof channels !== 'undefined' && channels) { %>
+                <% channels.forEach(ch => { 
+                  const isAssignedElsewhere = (typeof assignedChannelIds !== 'undefined' && assignedChannelIds) ? assignedChannelIds.includes(ch.id) : false;
+                %>
+                  <option value="<%= ch.id %>" data-assigned="<%= isAssignedElsewhere ? 'true' : 'false' %>">
+                    <%= ch.name %> (<%= ch.id %>)
+                  </option>
+                <% }); %>
+              <% } %>
+            </select>
+          </div>
+
+          <div class="admin-form-actions" style="display: flex; justify-content: flex-end; gap: 0.75rem;">
+            <button type="button" onclick="closeReassignModal()" class="btn" style="background: #ffffff; border: 1px solid var(--border-color); color: #09090b; padding: 0.55rem 0.9rem; font-size: 0.8125rem; font-weight: 500; border-radius: var(--radius-md); cursor: pointer;">
+              Cancel
+            </button>
+            <button type="submit" class="btn" style="background: var(--accent-blue); border: none; color: #ffffff; padding: 0.55rem 1rem; font-size: 0.8125rem; font-weight: 600; border-radius: var(--radius-md); cursor: pointer;">
+              Save Assignment
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Delete Operator Modal -->
+    <div id="deleteOperatorModal" style="display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.45); backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center; padding: 1.25rem; box-sizing: border-box;">
+      <div style="background: #ffffff; width: 100%; max-width: 440px; border-radius: var(--radius-lg); padding: 1.75rem 1.5rem; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04); border: 1px solid var(--border-color); box-sizing: border-box;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <div style="width: 32px; height: 32px; border-radius: 50%; background: #fee2e2; color: #ef4444; display: flex; align-items: center; justify-content: center;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+            </div>
+            <h2 style="font-size: 1.15rem; font-weight: 700; color: #09090b; margin: 0;">
+              Delete Operator
+            </h2>
+          </div>
+          <button type="button" onclick="closeDeleteOperatorModal()" style="background: none; border: none; cursor: pointer; color: var(--text-muted); padding: 0.25rem; display: flex; align-items: center; justify-content: center;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+
+        <p style="font-size: 0.875rem; color: var(--text-muted); line-height: 1.5; margin: 0 0 1.25rem 0;">
+          Are you sure you want to delete operator <strong id="deleteOpName" style="color: #09090b;"></strong>? Their account will be permanently removed, and any assigned channel will be freed up.
+        </p>
+
+        <form id="deleteOperatorForm" method="POST" action="">
+          <div class="admin-form-actions" style="display: flex; justify-content: flex-end; gap: 0.75rem;">
+            <button type="button" onclick="closeDeleteOperatorModal()" class="btn" style="background: #ffffff; border: 1px solid var(--border-color); color: #09090b; padding: 0.55rem 0.9rem; font-size: 0.8125rem; font-weight: 500; border-radius: var(--radius-md); cursor: pointer;">
+              Cancel
+            </button>
+            <button type="submit" class="btn" style="background: #dc2626; border: none; color: #ffffff; padding: 0.55rem 1.1rem; font-size: 0.8125rem; font-weight: 600; border-radius: var(--radius-md); cursor: pointer;">
+              Confirm Delete
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function openReassignModal(opId, opName, currentChannelId) {
+      document.getElementById('reassignOpName').textContent = opName;
+      document.getElementById('reassignForm').action = '/admin/operators/' + encodeURIComponent(opId) + '/reassign';
+      
+      const select = document.getElementById('reassignChannelSelect');
+      select.value = currentChannelId || '';
+
+      // Disable channels assigned to other operators, but allow selecting the current channel or unassigned channels
+      Array.from(select.options).forEach(opt => {
+        if (!opt.value) {
+          opt.disabled = false;
+        } else if (opt.value === currentChannelId) {
+          opt.disabled = false;
+        } else {
+          opt.disabled = opt.getAttribute('data-assigned') === 'true';
+        }
+      });
+
+      document.getElementById('reassignModal').style.display = 'flex';
+    }
+
+    function closeReassignModal() {
+      document.getElementById('reassignModal').style.display = 'none';
+    }
+
+    function openDeleteOperatorModal(opId, opName) {
+      document.getElementById('deleteOpName').textContent = opName;
+      document.getElementById('deleteOperatorForm').action = '/admin/operators/' + encodeURIComponent(opId) + '/delete';
+      document.getElementById('deleteOperatorModal').style.display = 'flex';
+    }
+
+    function closeDeleteOperatorModal() {
+      document.getElementById('deleteOperatorModal').style.display = 'none';
+    }
+
+    document.querySelectorAll('.btn-reassign-operator').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-op-id') || '';
+        const name = btn.getAttribute('data-op-name') || '';
+        const chId = btn.getAttribute('data-channel-id') || '';
+        openReassignModal(id, name, chId);
+      });
+    });
+
+    document.querySelectorAll('.btn-delete-operator').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-op-id') || '';
+        const name = btn.getAttribute('data-op-name') || '';
+        openDeleteOperatorModal(id, name);
+      });
+    });
+  </script>
+</body>
+</html>

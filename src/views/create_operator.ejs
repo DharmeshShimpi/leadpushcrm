@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= appTitle %> - Create Operator</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="app-container">
+    <main class="main-content" style="max-width: 520px; margin: 0 auto; width: 100%; padding: 2rem 1.25rem;">
+      <!-- Back Link -->
+      <div style="margin-bottom: 1.5rem;">
+        <a href="/admin/operators" class="btn" style="background: #ffffff; color: var(--text-muted); border: 1px solid var(--border-color); font-size: 0.8125rem; font-weight: 500; text-decoration: none; display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.45rem 0.85rem; border-radius: var(--radius-md); box-shadow: var(--shadow-sm);">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+          Back to Operators
+        </a>
+      </div>
+
+      <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 1.75rem 1.5rem; box-shadow: var(--shadow-sm);">
+        <h1 style="font-size: 1.35rem; font-weight: 700; color: #09090b; margin: 0 0 0.35rem 0; letter-spacing: -0.02em;">
+          Create Operator
+        </h1>
+        <p style="font-size: 0.8125rem; color: var(--text-muted); margin-bottom: 1.5rem;">
+          Add a new operator and assign them to a channel.
+        </p>
+
+        <!-- Error Messages -->
+        <% if (error === 'missing_fields') { %>
+          <div style="background: var(--badge-danger-bg); color: var(--badge-danger-text); padding: 0.65rem 0.85rem; border-radius: var(--radius-md); font-size: 0.8125rem; font-weight: 500; margin-bottom: 1.25rem;">
+            All fields are required.
+          </div>
+        <% } else if (error === 'phone_exists') { %>
+          <div style="background: var(--badge-danger-bg); color: var(--badge-danger-text); padding: 0.65rem 0.85rem; border-radius: var(--radius-md); font-size: 0.8125rem; font-weight: 500; margin-bottom: 1.25rem;">
+            An account with this phone number already exists.
+          </div>
+        <% } else if (error === 'invalid_phone') { %>
+          <div style="background: var(--badge-danger-bg); color: var(--badge-danger-text); padding: 0.65rem 0.85rem; border-radius: var(--radius-md); font-size: 0.8125rem; font-weight: 500; margin-bottom: 1.25rem;">
+            Please enter a valid phone number (at least 10 digits).
+          </div>
+        <% } else if (error === 'weak_password') { %>
+          <div style="background: var(--badge-danger-bg); color: var(--badge-danger-text); padding: 0.65rem 0.85rem; border-radius: var(--radius-md); font-size: 0.8125rem; font-weight: 500; margin-bottom: 1.25rem;">
+            Password must be at least 6 characters.
+          </div>
+        <% } else if (error === 'channel_already_assigned') { %>
+          <div style="background: var(--badge-danger-bg); color: var(--badge-danger-text); padding: 0.65rem 0.85rem; border-radius: var(--radius-md); font-size: 0.8125rem; font-weight: 500; margin-bottom: 1.25rem;">
+            This channel is already assigned to another operator. Each channel can only have one assigned operator.
+          </div>
+        <% } else if (error) { %>
+          <div style="background: var(--badge-danger-bg); color: var(--badge-danger-text); padding: 0.65rem 0.85rem; border-radius: var(--radius-md); font-size: 0.8125rem; font-weight: 500; margin-bottom: 1.25rem;">
+            Failed to create operator. Please try again.
+          </div>
+        <% } %>
+
+        <form action="/admin/operators" method="POST">
+          <div style="margin-bottom: 1.25rem;">
+            <label for="nameInput" style="display: block; font-size: 0.8125rem; font-weight: 600; color: #09090b; margin-bottom: 0.4rem;">
+              Name
+            </label>
+            <input type="text" id="nameInput" name="name" placeholder="e.g. Rajesh Kumar" required
+              style="width: 100%; padding: 0.65rem 0.85rem; border: 1px solid var(--border-color); border-radius: var(--radius-md); font-size: 0.875rem; font-family: inherit; color: var(--text-main); outline: none; box-sizing: border-box;">
+          </div>
+
+          <div style="margin-bottom: 1.25rem;">
+            <label for="phoneInput" style="display: block; font-size: 0.8125rem; font-weight: 600; color: #09090b; margin-bottom: 0.4rem;">
+              Phone Number
+            </label>
+            <input type="tel" id="phoneInput" name="phone" placeholder="e.g. 919876543210" required
+              style="width: 100%; padding: 0.65rem 0.85rem; border: 1px solid var(--border-color); border-radius: var(--radius-md); font-size: 0.875rem; font-family: inherit; color: var(--text-main); outline: none; box-sizing: border-box;">
+          </div>
+
+          <div style="margin-bottom: 1.25rem;">
+            <label for="passwordInput" style="display: block; font-size: 0.8125rem; font-weight: 600; color: #09090b; margin-bottom: 0.4rem;">
+              Password
+            </label>
+            <input type="password" id="passwordInput" name="password" placeholder="Min. 6 characters" required minlength="6"
+              style="width: 100%; padding: 0.65rem 0.85rem; border: 1px solid var(--border-color); border-radius: var(--radius-md); font-size: 0.875rem; font-family: inherit; color: var(--text-main); outline: none; box-sizing: border-box;">
+          </div>
+
+          <div style="margin-bottom: 1.75rem;">
+            <label for="channelSelect" style="display: block; font-size: 0.8125rem; font-weight: 600; color: #09090b; margin-bottom: 0.4rem;">
+              Assign to Channel
+            </label>
+            <select id="channelSelect" name="channel_id" required
+              style="width: 100%; padding: 0.65rem 0.85rem; border: 1px solid var(--border-color); border-radius: var(--radius-md); font-size: 0.875rem; font-family: inherit; color: var(--text-main); outline: none; background: #ffffff; cursor: pointer; box-sizing: border-box;">
+              <option value="">Select an available channel...</option>
+              <% channels.forEach(ch => { 
+                const assignedOp = (typeof assignedChannelMap !== 'undefined' && assignedChannelMap) ? assignedChannelMap.get(ch.id) : null;
+              %>
+                <% if (assignedOp) { %>
+                  <option value="<%= ch.id %>" disabled style="color: #a1a1aa; background-color: #f4f4f5;">
+                    <%= ch.name %> (<%= ch.id %>) — Assigned to <%= assignedOp %>
+                  </option>
+                <% } else { %>
+                  <option value="<%= ch.id %>">
+                    <%= ch.name %> (<%= ch.id %>)
+                  </option>
+                <% } %>
+              <% }); %>
+            </select>
+          </div>
+
+          <div class="admin-form-actions" style="display: flex; justify-content: flex-end; gap: 0.75rem;">
+            <a href="/admin/operators" class="btn" style="background: #ffffff; border: 1px solid var(--border-color); color: #09090b; padding: 0.6rem 1rem; font-size: 0.8125rem; font-weight: 500; border-radius: var(--radius-md); text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">
+              Cancel
+            </a>
+            <button type="submit" class="btn" style="background: var(--accent-blue); border: none; color: #ffffff; padding: 0.6rem 1.25rem; font-size: 0.8125rem; font-weight: 600; border-radius: var(--radius-md); cursor: pointer; font-family: inherit; justify-content: center;">
+              Create Operator
+            </button>
+          </div>
+        </form>
+      </div>
+    </main>
+  </div>
+</body>
+</html>
